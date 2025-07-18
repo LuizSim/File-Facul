@@ -1,62 +1,239 @@
 :root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  /* Nova pilha de fontes profissionais */
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
   color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  color: #0c2950; /* Cor principal do texto */
+  background-color: #fffeec; /* Cor principal do fundo */
   user-select: none;
 }
 
+h3 {
+  padding: 2vw;
+}
+
+h2 {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-weight: bold;
+  color: rgb(12, 42, 80);
+  font-size: 10vw;
+  padding: 10px;
+  border-radius: 8px;
+  width: 100%;
+  box-sizing: border-box;
+  text-align: center; /* Alterado: de 'align-content' para 'text-align' */
+}
+
 body { margin: 0; display: flex; place-items: center; min-width: 320px; min-height: 100vh; }
-#app { max-width: 800px; margin: 0 auto; padding: 2rem; text-align: center; width: 100%; }
+#app { max-width: 800px; margin: 0 auto; padding: 2rem; text-align: center; width: 100%; align-content: center; transition: opacity 1s ease-in-out, transform 1s ease-in-out; position: relative;}
 
 form { display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem; }
-input, button { padding: 0.75rem; border-radius: 8px; border: 1px solid transparent; font-size: 1em; }
-button { cursor: pointer; background-color: #1a1a1a; }
-button:hover { border-color: #646cff; }
+input, button {
+  font-family: inherit; /* Adicionado: Garante que usem a mesma fonte do resto do app */
+  padding: 0.75rem;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  font-size: 1em;
+}
+button { 
+  cursor: pointer; 
+  background-color: transparent;
+  color: #0c2950;
+  border: 1px solid #0c2950;
+  transition: all 0.2s ease-in-out;
+}
 
-.header { display: flex; justify-content: space-between; align-items: center; }
+button:hover { 
+  background-color: #0c2950;
+  color: #fffeec;
+}
 
-/* --- NOVOS ESTILOS PARA A GRADE DE ÍCONES --- */
+.header { 
+  display: flex; 
+  justify-content: space-between; 
+  align-items: center; 
+  padding: 1.5vw;
+  
+}
 
-/* Transforma a lista em uma grade flexível */
+/* Container geral dos botões do cabeçalho */
+.header-buttons {
+  display: flex;
+  align-items: center;
+  gap: 10px; /* Esta linha adiciona um espaço de 10px entre os botões */
+}
+
+.header-right-group {
+  display: flex;
+  align-items: center;
+  gap: 20px; /* Espaço entre o nome do usuário e os botões */
+}
+
+/* Estilo para o novo botão Aliss (e outros botões de ação se necessário) */
+.header-action-btn {
+  background-color: #0c2950;
+  color: #fffeec;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: transform 0.2s ease-in-out;
+}
+.header-action-btn:hover {
+  transform: scale(1.05);
+}
+
+#menu-toggle-btn {
+  padding: 8px; /* Padding para o botão do ícone */
+}
+
+.header-action-btn:hover {
+  transform: scale(1.05);
+  background-color: #0c2950; /* Mantém a cor no hover */
+  color: #fffeec;
+}
+
+/* Container que posiciona o dropdown */
+.menu-container {
+  position: relative;
+}
+
+/* O menu dropdown */
+.dropdown-menu {
+  position: absolute;
+  top: calc(100% + 5px); /* Posiciona abaixo do botão de menu */
+  right: 0;
+  background-color: #fffeec;
+  border: 1px solid #0c2950;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(12, 41, 80, 0.15);
+  z-index: 110;
+  width: 150px;
+  overflow: hidden;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  transform-origin: top right;
+}
+
+/* Classe para esconder/mostrar o menu */
+.dropdown-menu.hidden {
+  opacity: 0;
+  transform: scale(0.95);
+  pointer-events: none;
+}
+
+/* Botões dentro do dropdown */
+.dropdown-menu button {
+  width: 100%;
+  text-align: left;
+  border-radius: 0;
+  border: none;
+  border-bottom: 1px solid rgba(12, 41, 80, 0.1);
+  background-color: transparent;
+  padding: 12px 15px;
+}
+
+.dropdown-menu button:last-child {
+  border-bottom: none;
+}
+
+.dropdown-menu button:hover {
+  background-color: rgba(12, 41, 80, 0.05);
+  color: #0c2950; /* Mantém a cor do texto no hover */
+}
+
+#user-info {
+  font-size: 1.2em;
+  color: #0c2950;
+  font-weight: bold;
+}
+
+/* Estilos para a tela de carregamento inicial */
+#initial-loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 254, 236, 0.5); /* Fundo claro com transparência */
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 5000;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  transition: opacity 0.5s ease-out;
+}
+
+.sombra {
+  box-shadow: 0 4px 30px #0000005d;
+  border-radius: 2vw;
+}
+
+#initial-loading-overlay.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+#initial-logo {
+  max-width: 150px;
+  margin-bottom: 2rem;
+}
+
+/* Spinner com a nova paleta de cores */
+.spinner {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: 4px solid rgba(12, 41, 80, 0.2); /* Borda escura e sutil */
+  border-top-color: #0c2950; /* Ponta que gira na cor escura */
+  animation: spin 1.2s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* --- ESTILOS PARA A GRADE DE ÍCONES --- */
+
 #file-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 20px;
+  gap: 7.5vw;
   margin-top: 1.5rem;
-  justify-content: flex-start;
+  justify-content: center;
 }
 
 #file-list-error {
-  color: #030b3b;
+  color: #0c2950;
   font-size: 1.7em;
   margin-top: 1rem;
   font-family: 'Arial Rounded MT Bold', 'Quicksand', 'Nunito', Arial, sans-serif;
   align-content: center;
 }
 
-/* Remove o fundo e borda do item e o transforma em um container vertical */
 .file-item {
   background-color: transparent;
-  border: 1px solid transparent; /* Borda invisível para manter o tamanho no hover */
+  border: 1px solid transparent; 
   padding: 10px;
   border-radius: 8px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 100px;
+  width: 21.5vw;
   position: relative;
   transition: background-color 0.2s, border-color 0.2s;
 }
 
 .file-item:hover {
-  background-color: rgba(255, 255, 255, 0.05);
-  border-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(12, 41, 80, 0.05);
+  border-color: rgba(12, 41, 80, 0.1);
 }
 
-/* Container do ícone principal */
 .item-icon {
   width: 70px;
   height: 70px;
@@ -70,15 +247,20 @@ button:hover { border-color: #646cff; }
   height: 100%;
 }
 
-/* Estilo para o nome do arquivo/pasta abaixo do ícone */
 .item-name {
   font-size: 0.9em;
-  color: #f0f0f0;
+  color: #0c2950;
   text-align: center;
   width: 100%;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+#item-actions-title {
+  font-size: 1em;
+  color: #0c2950;
+  margin-bottom: 10px;
 }
 
 .file-item .file-actions {
@@ -88,13 +270,12 @@ button:hover { border-color: #646cff; }
   display: flex;
   flex-direction: column;
   gap: 5px;
-  opacity: 0; /* Começa escondido */
-  pointer-events: none; /* Impede cliques quando invisível */
+  opacity: 0; 
+  pointer-events: none; 
   transition: opacity 0.2s;
   z-index: 10;
 }
 
-/* Regra para MOSTRAR o menu de ações */
 .file-item .file-actions.visible {
   opacity: 1;
   pointer-events: all;
@@ -117,56 +298,105 @@ button:hover { border-color: #646cff; }
 
 /* --- ESTILOS DE BOTÕES DE AÇÃO --- */
 
-.toggle-auth-view { background: none; border: none; padding: 0; margin-top: 1rem; color: #a9a9ff; text-decoration: underline; }
+.toggle-auth-view { background: none; border: none; padding: 0; margin-top: 1rem; color: #0c2950; text-decoration: underline; }
 
-/* ... (outros estilos de modal e loading como antes) ... */
+.file-item.is-renaming { background-color: rgba(12, 41, 80, 0.1); outline: 1px solid #0c2950; }
 
-.file-item.is-renaming { background-color: #3a3a3a; outline: 1px solid #646cff; }
-
-/* Estilo para o botão principal de Upload de Arquivo */
-#upload-button { display: flex; justify-content: center; align-items: center; gap: 8px; background-color: #3b82f6; color: white; font-weight: bold; border: none; margin-top: 10px; transition: background-color 0.2s ease-in-out; }
-#upload-button:hover { background-color: #2563eb; }
+#upload-button { 
+  display: flex; 
+  justify-content: center; 
+  align-items: center; 
+  gap: 8px; 
+  background-color: #0c2950; /* Fundo escuro */
+  color: #fffeec; /* Texto claro */
+  font-weight: bold; 
+  border: 1px solid #0c2950; 
+  margin-top: 10px; 
+}
+#upload-button:hover { 
+  background-color: transparent;
+  color: #0c2950;
+}
 #upload-button svg { width: 20px; height: 20px; }
 
-/* Estilo para o input de arquivo personalizado */
-#file-input-label { display: inline-flex; align-items: center; justify-content: center; gap: 10px; padding: 10px 20px; background-color: #404040; color: #f0f0f0; border: 2px dashed #666; border-radius: 50px; cursor: pointer; transition: all 0.2s ease-in-out; text-align: center; }
-#file-input-label:hover { background-color: #555; border-color: #888; }
-#file-input-label.file-selected { background-color: #3b83f6d3; border-color: #0c52e9; border-style: solid; color: white; }
+#file-input-label { display: inline-flex; align-items: center; justify-content: center; gap: 10px; padding: 10px 20px; background-color: transparent; color: #0c2950; border: 2px dashed #0c2950; border-radius: 50px; cursor: pointer; transition: all 0.2s ease-in-out; text-align: center; }
+#file-input-label:hover { background-color: rgba(12, 41, 80, 0.1); }
+#file-input-label.file-selected { background-color: #0c2950; border-color: #0c2950; border-style: solid; color: #fffeec; }
 #file-input-icon-wrapper svg { width: 24px; height: 24px; }
 #file-input-text { font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 250px; }
 
-/* Estilos para o novo botão de download */
-/* Estilos para o novo botão de download (ATUALIZADO PARA AZUL) */
 .download-button,
 .delete-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background-color: #3b82f6; /* Azul principal para ambos */
-  color: white;
+  background-color: #0c2950;
+  color: #fffeec;
   width: 110px;
-  height: 54px; /* Aumentado de 44px para 54px */
-  border-radius: 8px; /* Bordas levemente arredondadas para retângulo */
+  height: 54px;
+  border-radius: 8px;
   text-decoration: none;
   font-size: 1.1em;
-  border: 2px solid #2563eb; /* Azul escuro para ambos */
-  transition: background-color 0.2s, border-color 0.2s;
+  border: 1px solid #0c2950;
+  transition: all 0.2s;
   cursor: pointer;
   gap: 0.5em;
   min-width: 110px;
-  min-height: 54px; /* Aumentado de 44px para 54px */
+  min-height: 54px;
   padding: 0;
-  margin: 0 auto; /* Centraliza horizontalmente se usado em bloco */
+  margin: 0 auto;
 }
 
-/* Modal de confirmação (usado para deletar arquivo e pasta) */
-#confirm-modal-overlay {
+.delete-file-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: transparent;
+  color: #0c2950;
+  border: 1px solid #0c2950;
+  border-radius: 8px;
+  width: 110px;
+  height: 54px;
+  font-size: 1.1em;
+  font-weight: 500;
+  gap: 0.5em;
+  transition: all 0.2s;
+  cursor: pointer;
+  min-width: 110px;
+  min-height: 54px;
+  padding: 0;
+  margin-left: 8px;
+}
+.delete-file-button:hover {
+  background-color: #0c2950;
+  color: #fffeec;
+}
+.delete-file-button svg {
+  width: 22px;
+  height: 22px;
+  margin-right: 4px;
+}
+
+#login-container,
+#signup-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  padding: 2rem;
+}
+
+/* Modals */
+#confirm-modal-overlay,
+#rename-folder-modal-overlay,
+#item-actions-modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(30, 30, 30, 0.55);
+  background: rgba(255, 254, 236, 0.55);
   justify-content: center;
   align-items: center;
   z-index: 3000;
@@ -174,19 +404,24 @@ button:hover { border-color: #646cff; }
   -webkit-backdrop-filter: blur(6px);
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.7s ease;
   display: flex;
 }
 
-#confirm-modal-overlay.visible {
+#confirm-modal-overlay.visible,
+#rename-folder-modal-overlay.visible,
+#item-actions-modal-overlay.visible {
   opacity: 1;
   pointer-events: all;
 }
 
-#confirm-modal {
-  background: #232323;
-  color: #fff;
+#confirm-modal,
+#rename-folder-modal,
+#item-actions-modal {
+  background: #fffeec;
+  color: #0c2950;
   border-radius: 12px;
+  border: 1px solid #0c2950;
   box-shadow: 0 8px 32px rgba(0,0,0,0.35);
   padding: 2.5rem 2rem 2rem 2rem;
   min-width: 320px;
@@ -197,17 +432,50 @@ button:hover { border-color: #646cff; }
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-  transform: translateY(-40px) scale(0.98);
-  opacity: 0;
-  transition: opacity 0.3s cubic-bezier(.4,2,.6,1), transform 0.3s cubic-bezier(.4,2,.6,1);
 }
 
-#confirm-modal-overlay.visible #confirm-modal {
+#confirm-modal, #rename-folder-modal, #item-actions-modal {
+  transform: translateY(-40px) scale(0.98);
+  opacity: 0;
+  transition: opacity 0.7s cubic-bezier(.4,2,.6,1), transform 0.7s cubic-bezier(.4,2,.6,1);
+}
+#confirm-modal-overlay.visible #confirm-modal,
+#rename-folder-modal-overlay.visible #rename-folder-modal,
+#item-actions-modal-overlay.visible #item-actions-modal {
   opacity: 1;
   transform: translateY(0) scale(1);
 }
 
-/* Botões do modal de confirmação */
+.criarPST {
+  background-color: #0c2950;
+  color: #fffeec;
+  border: none;
+  padding: 10px 20px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+#show-board-btn, #logout-button, #aliss-btn {
+  background-color: #0c2950;
+  color: #fffeec;
+  border: none;
+  padding: 2vw 4vw;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.entrar, .cconta {
+  background-color: #0c2950;
+  color: #fffeec;
+  border: none;
+  padding: 10px 20px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
 #confirm-modal .modal-buttons {
   display: flex;
   gap: 1.5rem;
@@ -218,78 +486,32 @@ button:hover { border-color: #646cff; }
 #confirm-modal .modal-buttons button {
   padding: 0.7em 2.2em;
   border-radius: 8px;
-  border: none;
   font-size: 1.1em;
   font-weight: bold;
   cursor: pointer;
-  transition: background 0.2s, color 0.2s;
+  transition: all 0.2s;
 }
 
 #confirm-modal .modal-buttons .confirm {
-  background: #ef4444;
-  color: #fff;
+  background: transparent;
+  color: #0c2950;
+  border: 1px solid #0c2950;
 }
 
 #confirm-modal .modal-buttons .confirm:hover {
-  background: #b91c1c;
+  background: #0c2950;
+  color: #fffeec;
 }
 
 #confirm-modal .modal-buttons .cancel {
-  background: #232323;
-  color: #fff;
-  border: 1px solid #888;
+  background: #0c2950;
+  color: #fffeec;
+  border: 1px solid #0c2950;
 }
 
 #confirm-modal .modal-buttons .cancel:hover {
-  background: #444;
-  color: #fff;
-}
-
-/* Overlay para o modal de renomear pasta */
-#rename-folder-modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: rgba(30, 30, 30, 0.35);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 4000;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.3s;
-}
-
-#rename-folder-modal-overlay.visible {
-  opacity: 1;
-  pointer-events: all;
-}
-
-/* Modal centralizado */
-#rename-folder-modal {
-  background: #232323;
-  color: #fff;
-  border-radius: 14px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.35);
-  padding: 2.5rem 2rem 2rem 2rem;
-  min-width: 320px;
-  max-width: 90vw;
-  text-align: center;
-  z-index: 4100;
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  align-items: center;
-  animation: modalIn 0.3s cubic-bezier(.4,2,.6,1);
-}
-
-@keyframes modalIn {
-  from { opacity: 0; transform: translateY(-40px) scale(0.98);}
-  to   { opacity: 1; transform: translateY(0) scale(1);}
+  background: transparent;
+  color: #0c2950;
 }
 
 #rename-folder-modal .rename-form {
@@ -302,50 +524,281 @@ button:hover { border-color: #646cff; }
   font-size: 1.1em;
 }
 
-/* Novos estilos para o modal de ações do item */
-#item-actions-modal-overlay {
+.file-actions,
+.file-actions button,
+.file-actions a {
+  display: none !important;
+}
+
+.excluir {
+  align-items: center;
+  justify-content: center;
+  background-color: #0c2950;
+  color: #fffeec;
+  width: 110px;
+  height: 54px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-size: 1.1em;
+  border: 1px solid #0c2950;
+  transition: all 0.2s;
+  cursor: pointer;
+  gap: 0.5em;
+  min-width: 110px;
+  min-height: 54px;
+  padding: 0;
+  margin: 0 auto;
+}
+
+.excluir:hover {
+  background-color: #0c2950;
+  color: #fffeec;
+}
+
+.rename-folder-button {
+  align-items: center;
+  justify-content: center;
+  background-color: #0c2950;
+  color: #fffeec;
+  width: 110px;
+  height: 54px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-size: 1em;
+  border: 1px solid #0c2950;
+  transition: all 0.2s;
+  cursor: pointer;
+  gap: 0.5em;
+  min-width: 110px;
+  min-height: 54px;
+  padding: 0;
+  margin: 0 auto;
+}
+
+.excluir:hover {
+  background-color: #0c2950;
+  color: #fffeec;
+}
+
+.excluir svg {
+  width: 22px;
+  height: 22px;
+  margin-right: 4px;
+}
+
+/* Cor do texto de placeholder (ex: "seu nome de usuário") */
+input[type="text"]::placeholder,
+input[type="password"]::placeholder {
+  color: rgba(12, 41, 80, 0.6); /* Cor escura com um pouco de transparência */
+}
+
+/* Estilos específicos para os campos de texto e senha */
+input[type="text"],
+input[type="password"] {
+  background-color: #fffeec; /* Fundo na mesma cor da página */
+  border: 1px solid #0c2950;   /* Borda escura para visibilidade */
+  color: #0c2950;            /* Texto digitado na cor escura */
+  transition: all 0.2s ease-in-out; /* Adicionado para suavizar todas as transições */
+}
+
+/* Estilo ao focar no campo, para melhor usabilidade */
+input[type="text"]:focus,
+input[type="password"]:focus {
+  outline: none; /* Remove o outline padrão do navegador */
+  border-color: #0c2950;
+  box-shadow: 0 0 0 2px rgba(12, 41, 80, 0.4); /* Adiciona um "brilho" azul ao redor */
+  transform: scale(1.02); /* Adicionado: Efeito de inflar */
+}
+
+/* --- Estilos para a tela de Loading de Upload --- */
+
+#loading-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(30, 30, 30, 0.35);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: rgba(255, 254, 236, 0.55); /* Fundo claro da paleta invertida */
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 10000;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
-  z-index: 4000;
+  gap: 1.5rem;
+  
+  /* Escondido por padrão */
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.3s;
+  transition: opacity 0.3s ease-in-out;
 }
 
-#item-actions-modal-overlay.visible {
+/* Classe que o JavaScript adiciona para tornar o overlay visível */
+#loading-overlay.visible {
   opacity: 1;
   pointer-events: all;
 }
 
-#item-actions-modal {
-  background: #232323;
-  color: #fff;
-  border-radius: 14px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.35);
-  padding: 2.5rem 2rem 2rem 2rem;
-  min-width: 320px;
-  max-width: 90vw;
-  text-align: center;
-  z-index: 5100;
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  align-items: center;
-  animation: modalIn 0.3s cubic-bezier(.4,2,.6,1);
+/* Estilo do texto dentro do loading overlay */
+#loading-overlay p {
+  font-size: 1.2em;
+  font-weight: 500;
+  color: #0c2950; /* Texto escuro da paleta invertida */
 }
 
-/* Esconde completamente os botões antigos de ação dos itens */
-.file-actions,
-.file-actions button,
-.file-actions a {
+.uploader-name {
+  font-size: 0.75em;
+  color: rgba(12, 41, 80, 0.7); /* Cor escura, mas com transparência para diferenciar */
+  margin-top: 4px;
+  font-style: italic;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%; /* Garante que o text-overflow funcione */
+}
+
+#auth-view, #logged-in-view {
+  width: 100%;
+  transition: opacity 0.4s ease-in-out, transform 0.4s ease-in-out;
+}
+
+#board-view {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 100; 
+  background-color: #fffeec;
+  overflow-y: auto; 
+  /* LINHA ADICIONADA: Define a animação */
+  transition: transform 1s ease-in-out;
+  transform: translateX(0);
+}
+
+/* Estilo para o botão de voltar no quadro de tarefas */
+#back-to-files-btn {
+  position: absolute;
+  top: 30px;
+  left: 30px;
+  background-color: #0c2950;
+  color: #fffeec;
+  border: none;
+  padding: 10px 15px;
+  font-weight: 700;
+  z-index: 10;
+}
+
+#back-to-files-btn:hover {
+  transform: scale(1.05);
+  background-color: #0c2950; /* Mantém a cor no hover */
+  color: #fffeec;
+}
+
+.not-owner-message {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-weight: bold;
+  color: rgb(12, 42, 80); /* Cor escura, mas com transparência */
+  font-size: 5vw;
+  padding: 10px;
+  border-radius: 8px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* --- ESTILOS DE TRANSIÇÃO E VISIBILIDADE DE TELAS (VERSÃO CORRIGIDA) --- */
+
+/* Base para todas as "telas" principais */
+#app, #board-view, #aliss-view {
+  width: 100%;
+  transition: opacity 0.4s ease-in-out, transform 0.4s ease-in-out;
+  box-sizing: border-box; /* Garante que padding não aumente o tamanho */
+}
+
+/* Esconde o app de arquivos */
+.app-hidden {
+  opacity: 0;
+  transform: translateY(20px);
+  pointer-events: none;
+  position: absolute; /* Tira do fluxo para não causar pulos */
+}
+
+/* Esconde o quadro deslizando */
+#board-view.board-hidden {
+  transform: translateY(100%);
+  pointer-events: none;
+}
+
+/* Esconde a tela de login/cadastro e a tela Aliss */
+.view-hidden {
+  opacity: 0;
+  transform: translateY(30px);
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+}
+
+/* Container principal do armazenamento */
+.storage-container {
+  display: flex;
+  justify-content: flex-end; /* Alinha o botão 'Mostrar' à direita */
+  margin: 1rem 0;
+  height: 40px; /* Altura fixa para evitar pulos no layout */
+}
+
+/* Estilo da caixa de armazenamento, similar aos botões de download */
+.storage-info-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #0c2950;
+  color: #fffeec;
+  padding: 0 15px;
+  border-radius: 8px;
+  font-size: 0.9em;
+  font-weight: 500;
+  width: auto;
+  min-width: 280px;
+}
+
+#storage-info-text strong {
+  font-weight: 700;
+}
+
+/* Botão para mostrar o armazenamento (quando está escondido) */
+#show-storage-btn {
+  padding: 8px 15px;
+  font-size: 0.9em;
+  font-weight: 500;
+}
+
+/* Botão de toggle (olho) DENTRO da caixa */
+#toggle-storage-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+  margin-left: 15px;
+  /* Centraliza o ícone SVG perfeitamente */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#toggle-storage-btn svg {
+  stroke: #fffeec; /* Cor do ícone */
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+#toggle-storage-btn:hover svg {
+  opacity: 1;
+}
+
+/* Classe para esconder os elementos */
+.hidden {
   display: none !important;
 }

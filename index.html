@@ -5,11 +5,29 @@
   <meta charset="UTF-8" />
   <link rel="icon" type="image/svg+xml" href="/src/assets/File _Facul.png" />
   <link rel="stylesheet" href="/src/style.css" />
+  <link rel="stylesheet" href="/src/board.css" />
+  <link rel="stylesheet" href="/src/Aliss.css" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>File-facul</title>
 </head>
 
 <body>
+
+  <svg style="display: none">
+    <filter id="liquidglass">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur" />
+
+      <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7" result="goo" />
+
+      <feComposite in="SourceGraphic" in2="goo" operator="atop" />
+    </filter>
+  </svg>
+
+  <div id="initial-loading-overlay">
+    <img class="sombra" src="/src/assets/File _Facul.png" alt="Logo File-facul" id="initial-logo">
+    <div class="spinner"></div>
+  </div>
+
   <div id="app">
     <div id="app-message-container" style="display: none;">
       <p id="app-message-text"></p>
@@ -17,8 +35,9 @@
 
     <div id="loading-overlay" style="display: none;">
       <div class="spinner"></div>
-      <p>Enviando, aguarde...</p>
+      <p>aguarde...</p>
     </div>
+
 
     <!-- Modal de confirmação para deletar arquivo ou pasta -->
     <div id="confirm-modal-overlay">
@@ -46,7 +65,7 @@
           <label for="login-password">Senha</label>
           <input type="password" id="login-password" placeholder="********" required>
 
-          <button type="submit">Entrar</button>
+          <button class="entrar" type="submit">Entrar</button>
         </form>
         <button type="button" id="show-signup-view-button" class="toggle-auth-view">
           Não tenho conta, Cadastrar
@@ -65,7 +84,7 @@
           <label for="signup-password">Senha</label>
           <input type="password" id="signup-password" placeholder="Mínimo 6 caracteres" required>
 
-          <button type="submit">Criar Conta</button>
+          <button class="cconta" type="submit">Criar Conta</button>
         </form>
         <button type="button" id="show-login-view-button" class="toggle-auth-view">
           Já tenho conta, Fazer Login
@@ -73,10 +92,29 @@
       </div>
     </div>
 
-    <div id="logged-in-view" style="display: none;">
+    <div id="logged-in-view" class="view-hidden">
       <div class="header">
         <p id="user-info"></p>
-        <button id="logout-button">Sair</button>
+
+        <div class="header-buttons">
+          <button id="logout-button">Sair</button>
+
+          <div class="menu-container">
+            <button id="menu-toggle-btn" class="header-action-btn">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+              </svg>
+            </button>
+
+            <div id="header-menu" class="dropdown-menu hidden">
+              <button id="show-board-btn">Quadro</button>
+              <button id="aliss-btn" class="header-action-btn">Aliss</button>
+            </div>
+          </div>
+        </div>
       </div>
 
       <hr>
@@ -84,14 +122,14 @@
       <h3>Criar Nova Pasta</h3>
       <form id="create-folder-form">
         <input type="text" id="folder-name-input" placeholder="Nome da nova pasta" required>
-        <button type="submit">Criar Pasta</button>
+        <button class="criarPST" type="submit">Criar Pasta</button>
       </form>
 
       <hr>
 
       <h3>Enviar Novo Arquivo</h3>
       <form id="upload-form">
-        <input type="file" id="file-input" required style="display: none;">
+        <input type="file" id="file-input" multiple required style="display: none;">
         <label for="file-input" id="file-input-label">
           <span id="file-input-icon-wrapper">
             <svg id="icon-add-file" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -120,6 +158,8 @@
 
       <hr>
 
+      <p id="storage-info">Calculando armazenamento...</p>
+
       <h3>Central de Arquivos</h3>
 
       <div id="folder-navigation-controls" style="margin-bottom: 10px; text-align: left; min-height: 30px;">
@@ -147,12 +187,100 @@
     <div id="item-actions-modal-overlay">
       <div id="item-actions-modal">
         <h2 id="item-actions-title">Ações</h2>
-        <div id="item-actions-buttons" style="display: flex; gap: 1.5rem; justify-content: center; margin-top: 1.5rem;">
+        <div id="item-actions-buttons" style="display: flex; justify-content: center; gap: 1rem; margin-top: 1.5rem;">
         </div>
         <button id="item-actions-cancel" class="cancel-rename-button" style="margin-top: 2rem;">Cancelar</button>
       </div>
     </div>
   </div>
+
+  <div id="board-view" class="board-hidden">
+    <main>
+      <header>
+        <button id="back-to-files-btn">⬅</button>
+
+        <span>Quadro de tarefas</span>
+      </header>
+
+      <div class="create-column-wrapper">
+      </div>
+
+      <section class="columns">
+        <section class="column">
+          <div class="column__header">
+            <h2 class="column__title">Trabalhos</h2>
+          </div>
+          <section class="column__cards" id="column-trabalhos-cards"></section>
+          <button class="add-card__btn">+ Adicionar uma tarefa</button>
+        </section>
+
+        <section class="column">
+          <div class="column__header">
+            <h2 class="column__title">Questionários</h2>
+          </div>
+          <section class="column__cards" id="column-questionarios-cards"></section>
+          <button class="add-card__btn">+ Adicionar uma tarefa</button>
+        </section>
+
+        <section class="column">
+          <div class="column__header">
+            <h2 class="column__title">Formadoras</h2>
+          </div>
+          <section class="column__cards" id="column-formadoras-cards"></section>
+          <button class="add-card__btn">+ Adicionar uma tarefa</button>
+        </section>
+
+        <section class="column">
+          <div class="column__header">
+            <h2 class="column__title">Outros</h2>
+          </div>
+          <section class="column__cards" id="column-done-cards"></section>
+          <button class="add-card__btn">+ Adicionar uma tarefa</button>
+        </section>
+      </section>
+    </main>
+  </div>
+  </div>
+  <section id="aliss-view" class="view-hidden">
+    <div id="aliss-splash-screen">
+      <h1 class="splash-text">Aliss</h1>
+    </div>
+
+    <div class="aliss-container hidden">
+      <header class="aliss-header">
+        <button id="back-to-files-from-aliss-btn" class="back-button-aliss">⬅</button>
+        <h2>Aliss</h2>
+      </header>
+
+      <section class="chat-interface">
+        <div id="aliss-chat-messages" class="chat-messages">
+        </div>
+
+        <form id="aliss-prompt-form" class="chat-input-area">
+          <input id="aliss-file-input" type="file" multiple class="visually-hidden" />
+          <button id="aliss-attach-btn" type="button" title="Anexar arquivos">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+              <path fill-rule="evenodd"
+                d="M19.5 21a3 3 0 003-3V9a3 3 0 00-3-3h-5.25a.75.75 0 01-.75-.75V3a.75.75 0 00-.75-.75h-9A3 3 0 001.5 6v12a3 3 0 003 3h15zm-6.75-10.5a.75.75 0 00-1.5 0v4.5a.75.75 0 001.5 0v-4.5z"
+                clip-rule="evenodd" />
+              <path
+                d="M14.25 3.082a.75.75 0 01.75-.75h2.168a.75.75 0 01.53 1.28l-2.168 2.168a.75.75 0 01-1.28-.53V3.082z" />
+            </svg>
+          </button>
+          <div class="input-send-container">
+            <input type="text" id="aliss-question-input" placeholder="Digite sua pergunta aqui..." autocomplete="off" />
+            <button id="aliss-send-btn" type="submit" title="Enviar mensagem">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <path
+                  d="M3.478 2.405a.75.75 0 00-.926.94l2.432 7.905H13.5a.75.75 0 010 1.5H4.984l-2.432 7.905a.75.75 0 00.926.94 60.519 60.519 0 0018.445-8.986.75.75 0 000-1.218A60.517 60.517 0 003.478 2.405z" />
+              </svg>
+            </button>
+          </div>
+        </form>
+      </section>
+    </div>
+  </section>
+
   <script type="module" src="/src/main.tsx"></script>
 </body>
 

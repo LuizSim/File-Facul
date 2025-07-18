@@ -2,6 +2,8 @@ import './style.css'
 import { supabase } from './supabaseClient'
 import type { AuthSession } from '@supabase/supabase-js'
 import { handleCreateFolder, deleteFolderAndContents, renameFolder } from './folders';
+import { initializeBoard } from './board';
+import { initializeAliss } from './Aliss';
 
 // Interfaces para tipagem
 interface Folder {
@@ -25,6 +27,15 @@ interface FileItemDB {
   profiles?: { full_name: string | null } | null;
 }
 
+function formatBytes(bytes: number, decimals = 2): string {
+  if (bytes === 0) return '0 Bytes';
+  const k = 1024;
+  const dm = decimals < 0 ? 0 : decimals;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+}
+
 function getIconForItem(item: Folder | FileItemDB): string {
   if (item.item_type === 'folder') {
     return `<svg xmlns="http://www.w3.org/2000/svg" fill="#facc15" viewBox="0 0 24 24" stroke-width="1.5" stroke="#eab308"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" /></svg>`;
@@ -32,15 +43,15 @@ function getIconForItem(item: Folder | FileItemDB): string {
   const extension = item.file_name.split('.').pop()?.toLowerCase() || '';
   switch (extension) {
     case 'zip': case 'rar': case '7z':
-      return `<svg xmlns="http://www.w3.org/2000/svg" fill="#a78bfa" viewBox="0 0 24 24" stroke-width="1.5" stroke="white"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" /></svg>`;
+      return `<svg xmlns="http://www.w3.org/2000/svg" fill="#0c2950" viewBox="0 0 24 24" stroke-width="1.5" stroke="white"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" /></svg>`;
     case 'png': case 'jpg': case 'jpeg': case 'gif': case 'webp': case 'avif':
-      return `<svg xmlns="http://www.w3.org/2000/svg" fill="#60a5fa" viewBox="0 0 24 24" stroke-width="1.5" stroke="white"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.174C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.174 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" /><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" /></svg>`;
+      return `<svg xmlns="http://www.w3.org/2000/svg" fill="#0c2950" viewBox="0 0 24 24" stroke-width="1.5" stroke="white"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.174C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.174 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" /><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" /></svg>`;
     case 'dwg':
-      return `<svg xmlns="http://www.w3.org/2000/svg" fill="#f472b6" viewBox="0 0 24 24" stroke-width="1.5" stroke="white"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9.75v6.75m0 0l-3-3m3 3l3-3m-8.25 6a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" /></svg>`;
+      return `<svg xmlns="http://www.w3.org/2000/svg" fill="#0c2950" viewBox="0 0 24 24" stroke-width="1.5" stroke="white"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9.75v6.75m0 0l-3-3m3 3l3-3m-8.25 6a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" /></svg>`;
     case 'html': case 'css': case 'js': case 'ts': case 'tsx': case 'jsx': case 'json': case 'c': case 'cpp': case 'cs':
-      return `<svg xmlns="http://www.w3.org/2000/svg" fill="#818cf8" viewBox="0 0 24 24" stroke-width="1.5" stroke="white"><path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" /></svg>`;
+      return `<svg xmlns="http://www.w3.org/2000/svg" fill="#fffeec" viewBox="0 0 24 24" stroke-width="1.5" stroke="#0c2950"><path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" /></svg>`;
     default:
-      return `<svg xmlns="http://www.w3.org/2000/svg" fill="#9ca3af" viewBox="0 0 24 24" stroke-width="1.5" stroke="white"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m.75 12l3 3m0 0l3-3m-3 3v-6m-1.5-9H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>`;
+      return `<svg xmlns="http://www.w3.org/2000/svg" fill="#0c2950" viewBox="0 0 24 24" stroke-width="1.5" stroke="white"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m.75 12l3 3m0 0l3-3m-3 3v-6m-1.5-9H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>`;
   }
 }
 
@@ -61,6 +72,8 @@ function sanitizeFileName(name: string): string {
 
 document.addEventListener('DOMContentLoaded', () => {
 
+  // Adicionado: Referência para a nova tela de carregamento
+  const initialLoadingOverlay = document.querySelector<HTMLDivElement>('#initial-loading-overlay')!;
   const appElement = document.querySelector<HTMLDivElement>('#app')!;
   const authView = document.querySelector<HTMLDivElement>('#auth-view')!;
   const loggedInView = document.querySelector<HTMLDivElement>('#logged-in-view')!;
@@ -78,7 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const appMessageContainer = document.querySelector<HTMLDivElement>('#app-message-container')!;
   const appMessageText = document.querySelector<HTMLParagraphElement>('#app-message-text')!;
   const loadingOverlay = document.querySelector<HTMLDivElement>('#loading-overlay')!;
-  const loadingOverlayText = loadingOverlay.querySelector('p');
+  const loadingOverlayText = loadingOverlay ? loadingOverlay.querySelector('p') : null;
   const confirmModalOverlay = document.querySelector<HTMLDivElement>('#confirm-modal-overlay')!;
   const confirmModalMessage = document.querySelector<HTMLParagraphElement>('#confirm-modal-message')!;
   const confirmModalYesButton = document.querySelector<HTMLButtonElement>('#confirm-modal-yes-button')!;
@@ -90,21 +103,183 @@ document.addEventListener('DOMContentLoaded', () => {
   const fileInputText = document.querySelector<HTMLSpanElement>('#file-input-text')!;
   const iconAddFile = document.querySelector<SVGElement>('#icon-add-file')!;
   const iconFileSelected = document.querySelector<SVGElement>('#icon-file-selected')!;
+  const showBoardBtn = document.getElementById('show-board-btn') as HTMLButtonElement;
+  const backToFilesBtn = document.getElementById('back-to-files-btn') as HTMLButtonElement;
+  const boardView = document.getElementById('board-view') as HTMLElement;
+  const menuToggleBtn = document.getElementById('menu-toggle-btn');
+  const headerMenu = document.getElementById('header-menu');
+  const alissBtn = document.getElementById('aliss-btn') as HTMLButtonElement;
+  const alissView = document.getElementById('aliss-view') as HTMLElement;
+  const backFromAlissBtn = document.getElementById('back-to-files-from-aliss-btn') as HTMLButtonElement;
+  const storageInfo = document.querySelector<HTMLParagraphElement>('#storage-info')!;
+  const uploadButton = document.querySelector<HTMLButtonElement>('#upload-button')!;
 
-  if (!appElement || !authView || !loggedInView || !loginForm || !signupForm || !logoutButton ||
-    !uploadForm || !fileList || !appMessageContainer || !appMessageText || !loadingOverlay ||
-    !confirmModalOverlay || !confirmModalMessage || !confirmModalYesButton || !confirmModalNoButton ||
-    !createFolderForm || !folderNameInput || !loginContainer || !signupContainer || !folderNavigationControls ||
-    !userInfo || !fileInput || !loadingOverlayText ||
-    !fileInputLabel || !fileInputText || !iconAddFile || !iconFileSelected) {
-    console.error("ERRO CRÍTICO: Um ou mais elementos essenciais da UI não foram encontrados.");
-    return;
+  // Adicionado: Esconde a tela de carregamento após 2 segundos, incondicionalmente.
+  setTimeout(() => {
+    // CORREÇÃO: Usa a variável que já existe, não declara uma nova.
+    if (initialLoadingOverlay) {
+      initialLoadingOverlay.classList.add('hidden');
+    }
+  }, 2000);
+
+  // Adicionado: Bloco de verificação detalhado para encontrar o elemento que falta
+  const elementsToVerify = [
+    { name: 'initialLoadingOverlay', element: initialLoadingOverlay },
+    { name: 'appElement', element: appElement },
+    { name: 'authView', element: authView },
+    { name: 'loggedInView', element: loggedInView },
+    { name: 'loginContainer', element: loginContainer },
+    { name: 'loginForm', element: loginForm },
+    { name: 'showSignupViewButton', element: showSignupViewButton },
+    { name: 'signupContainer', element: signupContainer },
+    { name: 'signupForm', element: signupForm },
+    { name: 'showLoginViewButton', element: showLoginViewButton },
+    { name: 'logoutButton', element: logoutButton },
+    { name: 'userInfo', element: userInfo },
+    { name: 'uploadForm', element: uploadForm },
+    { name: 'fileInput', element: fileInput },
+    { name: 'fileList', element: fileList },
+    { name: 'appMessageContainer', element: appMessageContainer },
+    { name: 'appMessageText', element: appMessageText },
+    { name: 'loadingOverlay', element: loadingOverlay },
+    { name: 'loadingOverlayText', element: loadingOverlayText },
+    { name: 'confirmModalOverlay', element: confirmModalOverlay },
+    { name: 'confirmModalMessage', element: confirmModalMessage },
+    { name: 'confirmModalYesButton', element: confirmModalYesButton },
+    { name: 'confirmModalNoButton', element: confirmModalNoButton },
+    { name: 'createFolderForm', element: createFolderForm },
+    { name: 'folderNameInput', element: folderNameInput },
+    { name: 'folderNavigationControls', element: folderNavigationControls },
+    { name: 'fileInputLabel', element: fileInputLabel },
+    { name: 'fileInputText', element: fileInputText },
+    { name: 'iconAddFile', element: iconAddFile },
+    { name: 'iconFileSelected', element: iconFileSelected },
+  ];
+
+  // --- FUNÇÃO DE ARMAZENAMENTO ATUALIZADA ---
+  async function updateStorageUsage() {
+    if (!storageInfo) return;
+
+    try {
+      // Chama a função 'get_total_storage_size' que criamos no banco de dados
+      const { data, error } = await supabase.rpc('get_total_storage_size');
+
+      if (error) throw error;
+
+      const totalSize = data || 0;
+      const totalStorage = 1 * 1024 * 1024 * 1024; // 1 GB em Bytes
+      const percentageUsed = (totalSize / totalStorage) * 100;
+
+      storageInfo.innerHTML = `
+            Armazenamento: <strong>${formatBytes(totalSize)}</strong>
+            (${percentageUsed.toFixed(2)}%)
+        `;
+
+    } catch (error) {
+      console.error("Erro ao calcular o uso do armazenamento via RPC:", error);
+      storageInfo.textContent = "Não foi possível carregar o uso do armazenamento.";
+    }
+  }
+
+  let isAlissInitialized = false;
+
+  let allElementsFound = true;
+  for (const item of elementsToVerify) {
+    if (!item.element) {
+      console.error(`ERRO CRÍTICO: O elemento para "${item.name}" não foi encontrado! Verifique o seletor no main.tsx ou o ID correspondente no index.html.`);
+      allElementsFound = false;
+    }
+  }
+
+  if (!allElementsFound) {
+    return; // Para a execução do script se algum elemento não for encontrado
+  }
+
+  let isBoardInitialized = false;
+
+  const showFiles = () => {
+    boardView.classList.add('board-hidden');
+    alissView.classList.add('view-hidden');
+    appElement.classList.remove('app-hidden');
+  };
+
+  const showBoard = () => {
+    if (!isBoardInitialized) {
+      initializeBoard(session);
+      isBoardInitialized = true;
+    }
+    appElement.classList.add('app-hidden');
+    alissView.classList.add('view-hidden');
+    boardView.classList.remove('board-hidden');
+  };
+
+  const showAlissView = () => {
+    const alissSplashScreen = document.getElementById('aliss-splash-screen') as HTMLElement;
+    const splashText = alissSplashScreen.querySelector('.splash-text') as HTMLElement;
+    const alissContainer = alissView.querySelector('.aliss-container') as HTMLElement;
+
+    if (!alissView || !alissSplashScreen || !alissContainer || !splashText) return;
+
+    // 1. Prepara a cena: Garante que o chat está escondido e o splash visível.
+    alissContainer.classList.add('hidden');
+    alissSplashScreen.classList.remove('hidden');
+    // Remove a classe de animação para garantir que ela reinicie
+    splashText.classList.remove('start-animation');
+
+    // 2. Mostra a página Aliss (que contém o splash)
+    alissView.classList.remove('view-hidden');
+    appElement.classList.add('app-hidden');
+    boardView.classList.add('board-hidden');
+
+    // 3. Força o navegador a processar as mudanças e SÓ ENTÃO inicia a animação
+    setTimeout(() => {
+      splashText.classList.add('start-animation');
+    }, 20); // Um pequeno delay é suficiente
+
+    // 4. Agenda a troca para o chat após a animação do splash terminar
+    setTimeout(() => {
+      alissSplashScreen.classList.add('hidden');
+      alissContainer.classList.remove('hidden');
+
+      if (!isAlissInitialized) {
+        initializeAliss(session);
+        isAlissInitialized = true;
+      }
+    }, 3000); // Duração total da animação
+  };
+
+  if (showBoardBtn) showBoardBtn.addEventListener('click', showBoard);
+  if (backToFilesBtn) backToFilesBtn.addEventListener('click', showFiles);
+  if (alissBtn) alissBtn.addEventListener('click', showAlissView);
+  if (backFromAlissBtn) backFromAlissBtn.addEventListener('click', showFiles);
+
+  if (menuToggleBtn && headerMenu) {
+    menuToggleBtn.addEventListener('click', (event) => {
+      event.stopPropagation();
+      headerMenu.classList.toggle('hidden');
+    });
+
+    document.addEventListener('click', (event) => {
+      if (!headerMenu.classList.contains('hidden') && !menuToggleBtn.contains(event.target as Node)) {
+        headerMenu.classList.add('hidden');
+      }
+    });
   }
 
   let session: AuthSession | null = null;
   let appMessageTimeoutId: number | null = null;
   let currentFolderId: string | null = null;
   let pressTimer: number | null = null;
+
+  // Nova função para mostrar o loader por um tempo fixo
+  function showTimedLoader(text: string, duration: number = 3000) {
+    if (loadingOverlayText) loadingOverlayText.textContent = text;
+    loadingOverlay.classList.add('visible');
+
+    setTimeout(() => {
+      loadingOverlay.classList.remove('visible');
+    }, duration);
+  }
 
   function showAppMessage(message: string, type: 'success' | 'error' | 'info' = 'info', duration: number = 3000) {
     if (appMessageTimeoutId) clearTimeout(appMessageTimeoutId);
@@ -124,9 +299,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function hideLoading() {
-    loadingOverlay.classList.remove('visible'); // MUDANÇA: Usa classe em vez de style
-    // A remoção do blur agora é tratada no listener do modal de confirmação,
-    // para não remover o blur enquanto o outro modal estiver aberto.
+    loadingOverlay.classList.remove('visible');
     if (confirmModalOverlay.classList.contains('visible') === false) {
       appElement.classList.remove('app-blurred');
     }
@@ -171,15 +344,20 @@ document.addEventListener('DOMContentLoaded', () => {
     fileInput.value = '';
   }
 
+  // Modificado: A função `updateView` agora também esconde o loading inicial.
   function updateView() {
     if (session) {
-      authView.style.display = 'none';
-      loggedInView.style.display = 'block';
-      userInfo.textContent = `Logado como: ${session.user.user_metadata.username || session.user.email}`;
+      // Mostra a tela de arquivos e esconde a de login
+      authView.classList.add('view-hidden');
+      loggedInView.classList.remove('view-hidden');
+
+      userInfo.textContent = ` ${session.user.user_metadata.username || session.user.email}`;
       displayItemsInCurrentFolder(currentFolderId);
     } else {
-      authView.style.display = 'block';
-      loggedInView.style.display = 'none';
+      // Mostra a tela de login e esconde a de arquivos
+      authView.classList.remove('view-hidden');
+      loggedInView.classList.add('view-hidden');
+
       currentFolderId = null;
     }
   }
@@ -286,34 +464,73 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
             <div class="file-actions"></div>
           `;
-        } else {
-          itemDiv.dataset.uploaderId = item.uploader_id; // <-- Adicionado aqui
+          // ... dentro da função displayItemsInCurrentFolder, dentro do forEach
+
+        } else { // Se for um arquivo
+          itemDiv.dataset.uploaderId = item.uploader_id;
           itemDiv.dataset.storagePath = item.storage_path;
+          itemDiv.dataset.fileId = item.id;
 
+          // Adicionado: Pega o nome do uploader do mapa que já buscamos
+          const uploaderName = profilesMap.get(item.uploader_id)?.full_name || 'Desconhecido';
+
+          // Modificado: Adiciona o span com o nome do uploader
           itemDiv.innerHTML = `
-            <div class="item-icon">${iconHtml}</div>
-            <span class="item-name" title="${itemName}">${itemName}</span>
-            <div class="file-actions"></div>
-          `;
-        }
+          <div class="item-icon">${iconHtml}</div>
+          <span class="item-name" title="${itemName}">${itemName}</span>
+          <span class="uploader-name" title="Enviado por: ${uploaderName}">por: ${uploaderName}</span>
+          <div class="file-actions"></div>`;
 
-        const actionsDiv = itemDiv.querySelector('.file-actions')!;
+          const actionsDiv = itemDiv.querySelector('.file-actions')!;
+          // Botão de Download: Sempre visível para arquivos
+          if (item.item_type === 'file') {
+            const { data: publicUrlData } = supabase.storage.from('files').getPublicUrl(item.storage_path);
+            const downloadLink = document.createElement('a');
+            downloadLink.href = publicUrlData.publicUrl;
+            downloadLink.className = 'download-button';
+            downloadLink.title = 'Baixar';
+            downloadLink.target = '_blank';
+            downloadLink.download = item.file_name;
+            downloadLink.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>`;
+            actionsDiv.appendChild(downloadLink);
 
-        if (item.item_type === 'file') {
-          const { data: publicUrlData } = supabase.storage.from('files').getPublicUrl(item.storage_path);
-          const downloadLink = document.createElement('a');
-          downloadLink.href = publicUrlData.publicUrl;
-          downloadLink.className = 'download-button';
-          downloadLink.title = 'Baixar';
-          downloadLink.target = '_blank';
-          downloadLink.download = item.file_name;
-          downloadLink.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>`;
-          actionsDiv.appendChild(downloadLink);
+            const isOwner = currentLoggedInUserId === item.uploader_id;
+            if (isOwner) { // Botão de Deletar: Apenas para o dono
+              const deleteFileBtn = document.createElement('button');
+              deleteFileBtn.className = 'excluir';
+              deleteFileBtn.title = 'Deletar arquivo';
+              deleteFileBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="display:inline-block;vertical-align:middle;"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.134-2.09-2.134H8.09a2.09 2.09 0 00-2.09 2.134v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg>`;
+              actionsDiv.appendChild(deleteFileBtn);
+
+              // Estilo opcional para o botão
+              deleteFileBtn.style.borderRadius = '4px';
+              deleteFileBtn.style.padding = '4px 10px';
+              deleteFileBtn.style.background = '#ef4444';
+              deleteFileBtn.style.color = '#fff';
+              deleteFileBtn.style.border = 'none';
+              deleteFileBtn.style.marginLeft = '6px';
+              deleteFileBtn.style.display = 'inline-flex';
+              deleteFileBtn.style.alignItems = 'center';
+              deleteFileBtn.style.gap = '4px';
+              deleteFileBtn.style.transition = 'background 0.2s';
+              deleteFileBtn.onmouseover = () => { deleteFileBtn.style.background = '#dc2626'; };
+              deleteFileBtn.onmouseout = () => { deleteFileBtn.style.background = '#ef4444'; };
+
+              deleteFileBtn.addEventListener('click', async (e) => {
+                e.preventDefault();
+                const confirmed = await showCustomConfirm('Tem certeza que deseja deletar este ARQUIVO? Esta ação é irreversível.');
+                if (confirmed) {
+                  await handleDeleteFile(item.id, item.storage_path);
+                }
+              });
+            }
+          }
         }
 
         const isOwner = currentLoggedInUserId === (item.item_type === 'folder' ? item.owner_id : item.uploader_id);
 
         if (isOwner) {
+          const actionsDiv = itemDiv.querySelector('.file-actions')!;
           if (item.item_type === 'folder') {
             const renameBtn = document.createElement('button');
             renameBtn.className = 'rename-folder-button';
@@ -361,6 +578,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Torna o botão de deletar retangular
+        const actionsDiv = itemDiv.querySelector('.file-actions')!;
         const deleteBtnEl = actionsDiv.querySelector('.delete-button') as HTMLButtonElement | null;
         if (deleteBtnEl) {
           deleteBtnEl.style.borderRadius = '4px';
@@ -392,44 +610,67 @@ document.addEventListener('DOMContentLoaded', () => {
       console.error("Erro geral ao exibir itens:", error);
       if (fileList) fileList.innerHTML = '<p id="file-list-error">Erro ao carregar, verifique sua internet.</p>';
     } finally { hideLoading(); }
+    updateStorageUsage();
   }
 
   async function handleUpload(event: Event) {
     event.preventDefault();
-    const file = fileInput!.files?.[0];
-    if (!file || !session) {
-      showAppMessage('Por favor, selecione um arquivo.', 'error');
+
+    const files = fileInput!.files;
+    if (!files || files.length === 0 || !session) {
+      showAppMessage('Por favor, selecione um ou mais arquivos.', 'error');
       return;
     }
-    showLoading("Enviando, aguarde...");
 
-    const sanitizedOriginalName = sanitizeFileName(file.name);
-    const storageFolderPrefix = currentFolderId ? `${session.user.id}/${currentFolderId}` : `${session.user.id}/root`;
-    const storagePath = `${storageFolderPrefix}/${Date.now()}_${sanitizedOriginalName}`;
+    // Desabilita o botão e o input
+    uploadButton.disabled = true;
+    fileInput.disabled = true;
+    uploadButton.innerHTML = `<span>Enviando ${files.length} arquivo(s)...</span>`;
 
-    try {
-      const { error: uploadError } = await supabase.storage.from('files').upload(storagePath, file);
-      if (uploadError) throw uploadError;
+    showTimedLoader(`Enviando ${files.length} arquivo(s)...`, 3000);
 
-      const { error: insertError } = await supabase.from('files').insert({
-        file_name: file.name,
-        file_type: file.type,
-        storage_path: storagePath,
-        uploader_id: session.user.id,
-        folder_id: currentFolderId
-      });
-      if (insertError) throw insertError;
+    let allUploadsSuccessful = true;
 
-      showAppMessage('Arquivo enviado!', 'success');
-      uploadForm!.reset();
-      resetFileInputLabel();
-      displayItemsInCurrentFolder(currentFolderId);
-    } catch (e: any) {
-      console.error('Upload falhou:', e);
-      showAppMessage(`Falha no upload: ${e.message}`, 'error');
-    } finally {
-      hideLoading();
+    // Faz o upload de cada arquivo um por um
+    for (const file of files) {
+      const sanitizedOriginalName = sanitizeFileName(file.name);
+      const storageFolderPrefix = currentFolderId ? `${session.user.id}/${currentFolderId}` : `${session.user.id}/root`;
+      const storagePath = `${storageFolderPrefix}/${Date.now()}_${sanitizedOriginalName}`;
+
+      try {
+        const { error: uploadError } = await supabase.storage.from('files').upload(storagePath, file);
+        if (uploadError) throw uploadError;
+
+        const { error: insertError } = await supabase.from('files').insert({
+          file_name: file.name,
+          file_type: file.type,
+          storage_path: storagePath,
+          uploader_id: session.user.id,
+          folder_id: currentFolderId
+        });
+        if (insertError) throw insertError;
+
+      } catch (e: any) {
+        allUploadsSuccessful = false;
+        console.error(`Falha no upload de ${file.name}:`, e);
+        showAppMessage(`Falha no upload de ${file.name}: ${e.message}`, 'error');
+        break; // Para o loop se um arquivo falhar
+      }
     }
+
+    // Reabilita o botão e o input
+    uploadButton.disabled = false;
+    fileInput.disabled = false;
+    uploadButton.innerHTML = `<svg>...</svg><span>Enviar Arquivo</span>`; // Coloque seu SVG original de volta aqui
+
+    if (allUploadsSuccessful) {
+      showAppMessage('Upload(s) concluído(s) com sucesso!', 'success');
+    }
+
+    uploadForm!.reset();
+    resetFileInputLabel();
+    displayItemsInCurrentFolder(currentFolderId);
+    updateStorageUsage(); // Atualiza a contagem após o upload
   }
 
   async function handleAttemptDeleteFolder(folderId: string) {
@@ -503,6 +744,23 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  async function handleDeleteFile(fileId: string, storagePath: string) {
+    showLoading("Deletando arquivo...");
+    try {
+      const { error: storageError } = await supabase.storage.from('files').remove([storagePath]);
+      if (storageError) throw storageError;
+      const { error: dbError } = await supabase.from('files').delete().eq('id', fileId);
+      if (dbError) throw dbError;
+      showAppMessage('Arquivo deletado!', 'success');
+      displayItemsInCurrentFolder(currentFolderId);
+    } catch (e: any) {
+      console.error('Erro ao deletar arquivo:', e);
+      showAppMessage(`Falha ao deletar: ${e.message}`, 'error');
+    } finally {
+      hideLoading();
+    }
+  }
+
   // --- EVENT LISTENERS ---
   showSignupViewButton.addEventListener('click', (_event) => {
     if (loginContainer && signupContainer) { loginContainer.style.display = 'none'; signupContainer.style.display = 'block'; }
@@ -572,7 +830,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Verifique se o usuário é o autor
     const ownerId = isFolder ? itemDiv.dataset.ownerId : itemDiv.dataset.uploaderId;
-    if (ownerId !== session?.user.id) return; // <-- Só mostra para o autor
+    console.log(ownerId);
 
     showItemActionsModal({
       isFolder,
@@ -601,7 +859,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Atualiza o título do modal
     title.textContent = args.itemName ? `Ações para "${args.itemName}"` : 'Ações';
 
-    // Limpa os botões antigos
+    buttonsDiv.style.gap = '1rem';
+    title.textContent = args.itemName ? `Ações para "${args.itemName}"` : 'Ações';
     buttonsDiv.innerHTML = '';
 
     // Botão de baixar (apenas para arquivos)
@@ -610,48 +869,85 @@ document.addEventListener('DOMContentLoaded', () => {
       downloadBtn.className = 'download-button';
       downloadBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:24px;height:24px;vertical-align:middle;"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg> Baixar`;
       downloadBtn.onclick = () => {
-        // Procura o link de download no item e clica
         const downloadLink = args.itemDiv.querySelector('.download-button') as HTMLAnchorElement;
         if (downloadLink) downloadLink.click();
         overlay.classList.remove('visible');
         document.getElementById('app')?.classList.remove('app-blurred');
       };
       buttonsDiv.appendChild(downloadBtn);
+
+      // Botão de deletar (apenas se o usuário for o dono)
+      const currentLoggedInUserId = session!.user.id; // Certifique-se de que 'session' está acessível aqui
+      const uploaderId = args.itemDiv.dataset.uploaderId;
+
+      if (uploaderId === currentLoggedInUserId) {
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'excluir';
+        deleteBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="vertical-align:middle;"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.134-2.09-2.134H8.09a2.09 2.09 0 00-2.09 2.134v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg> Deletar`;
+        deleteBtn.onclick = async () => {
+          overlay.classList.remove('visible');
+          document.getElementById('app')?.classList.remove('app-blurred');
+          const fileId = args.itemId;
+          const storagePath = args.itemDiv.dataset.storagePath;
+          if (fileId && storagePath) {
+            const confirmed = await showCustomConfirm('Tem certeza que deseja deletar este ARQUIVO? Esta ação é irreversível.');
+            if (confirmed) {
+              await handleDeleteFile(fileId, storagePath);
+            }
+          }
+        };
+        buttonsDiv.appendChild(deleteBtn);
+      }
     }
 
-    // Botão de renomear (apenas para pastas)
+    // Botão de renomear (apenas para pastas e se for o dono)
     if (args.isFolder) {
-      const renameBtn = document.createElement('button');
-      renameBtn.className = 'rename-folder-button';
-      renameBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="vertical-align:middle;"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125"></path></svg> Renomear`;
-      renameBtn.onclick = () => {
-        overlay.classList.remove('visible');
-        document.getElementById('app')?.classList.remove('app-blurred');
-        // Abre o modal de renomear já existente
-        const renameOverlay = document.getElementById('rename-folder-modal-overlay')!;
-        const input = document.getElementById('rename-folder-input') as HTMLInputElement;
-        renameOverlay.classList.add('visible');
-        input.value = args.itemName || '';
-        input.focus();
-        input.setSelectionRange(0, input.value.length);
-        renameOverlay.setAttribute('data-folder-id', args.itemId || '');
-      };
-      buttonsDiv.appendChild(renameBtn);
+      const currentLoggedInUserId = session!.user.id; // Certifique-se de que 'session' está acessível aqui
+      const ownerId = args.itemDiv.dataset.ownerId;
+
+      if (ownerId === currentLoggedInUserId) { // Condição para renomear pasta
+        const renameBtn = document.createElement('button');
+        renameBtn.className = 'rename-folder-button';
+        renameBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="vertical-align:middle;"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125"></path></svg> Renomear`;
+        renameBtn.onclick = () => {
+          overlay.classList.remove('visible');
+          document.getElementById('app')?.classList.remove('app-blurred');
+          const renameOverlay = document.getElementById('rename-folder-modal-overlay')!;
+          const input = document.getElementById('rename-folder-input') as HTMLInputElement;
+          renameOverlay.classList.add('visible');
+          input.value = args.itemName || '';
+          input.focus();
+          input.setSelectionRange(0, input.value.length);
+          renameOverlay.setAttribute('data-folder-id', args.itemId || '');
+        };
+        buttonsDiv.appendChild(renameBtn);
+      } else {
+        // O usuário NÃO é o dono: mostra a mensagem
+        const messageP = document.createElement('p');
+        messageP.className = 'not-owner-message';
+        messageP.textContent = 'Você não é o proprietário desta pasta';
+        buttonsDiv.appendChild(messageP);
+      }
     }
 
-    // Botão de deletar (apenas para pastas)
+    // Botão de deletar (apenas para pastas e se for o dono)
     if (args.isFolder) {
-      const deleteBtn = document.createElement('button');
-      deleteBtn.className = 'delete-button';
-      deleteBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="vertical-align:middle;"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.134-2.09-2.134H8.09a2.09 2.09 0 00-2.09 2.134v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg> Deletar`;
-      deleteBtn.onclick = async () => {
-        overlay.classList.remove('visible');
-        document.getElementById('app')?.classList.remove('app-blurred');
-        if (args.itemId) {
-          await handleAttemptDeleteFolder(args.itemId);
-        }
-      };
-      buttonsDiv.appendChild(deleteBtn);
+      const currentLoggedInUserId = session!.user.id;
+      const ownerId = args.itemDiv.dataset.ownerId;
+
+      if (ownerId === currentLoggedInUserId) { // Condição para deletar pasta
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'delete-button';
+        deleteBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="vertical-align:middle;"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.134-2.09-2.134H8.09a2.09 2.09 0 00-2.09 2.134v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg> Deletar`;
+        deleteBtn.onclick = async () => {
+          overlay.classList.remove('visible');
+          document.getElementById('app')?.classList.remove('app-blurred');
+          if (args.itemId) {
+            await handleAttemptDeleteFolder(args.itemId);
+          }
+        };
+        buttonsDiv.appendChild(deleteBtn);
+      }
     }
 
     // Botão de cancelar
@@ -769,9 +1065,13 @@ document.addEventListener('DOMContentLoaded', () => {
   createFolderForm.addEventListener('submit', async (event) => {
     event.preventDefault();
     const folderName = folderNameInput.value;
-    showLoading("Criando pasta...");
+
+    // Mostra o loader por 3 segundos e continua o processo em paralelo
+    showTimedLoader("Criando pasta...", 3000);
+
     const result = await handleCreateFolder(folderName, session, currentFolderId);
-    hideLoading();
+
+    // O resultado da operação é tratado normalmente, sem o hideLoading()
     if (result.success) {
       showAppMessage('Pasta criada!', 'success');
       folderNameInput.value = '';
@@ -793,10 +1093,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  // Modificado: Este bloco agora controla a CONDIÇÃO 2
   supabase.auth.onAuthStateChange((_event, newSession) => {
     session = newSession;
     if (!newSession) { currentFolderId = null; }
-    updateView();
+    updateView(); // Apenas atualiza a view, não mexe mais no loader inicial
   });
 
   const renameFolderModalOverlay = document.getElementById('rename-folder-modal-overlay')!;
@@ -817,4 +1118,5 @@ document.addEventListener('DOMContentLoaded', () => {
   renameFolderCancel.addEventListener('click', () => {
     renameFolderModalOverlay.classList.remove('visible');
   });
+
 });
