@@ -919,30 +919,54 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  fileList.addEventListener('touchstart', (event) => {
+  fileList.removeEventListener('touchstart', handleTouchStart);
+  fileList.removeEventListener('touchend', handleTouchEnd);
+  fileList.removeEventListener('touchmove', handleTouchMove);
+
+  function handleTouchStart(event: TouchEvent) {
     const itemDiv = (event.target as HTMLElement).closest('.file-item');
-    if (!itemDiv || itemDiv.classList.contains('is-renaming')) return;
+    if (!itemDiv) return;
 
     pressTimer = window.setTimeout(() => {
       pressTimer = null;
-      document.querySelectorAll('.file-actions.visible').forEach(menu => menu.classList.remove('visible'));
-      const actionsDiv = itemDiv.querySelector('.file-actions');
-      if (actionsDiv && actionsDiv.innerHTML.trim() !== '') {
-        actionsDiv.classList.add('visible');
-        if (window.navigator.vibrate) {
-          window.navigator.vibrate(50);
-        }
+
+      event.preventDefault();
+
+      if (window.navigator.vibrate) {
+        window.navigator.vibrate(50);
       }
-    }, 1000);
-  }, { passive: true });
 
-  fileList.addEventListener('touchend', () => {
-    clearTimeout(pressTimer!);
-  });
+      const isFolder = itemDiv.classList.contains('folder-item');
+      const itemId = isFolder ? (itemDiv as HTMLElement).dataset.folderId : (itemDiv as HTMLElement).dataset.fileId;
+      const itemName = itemDiv.querySelector('.item-name')?.textContent ?? undefined;
 
-  fileList.addEventListener('touchmove', () => {
-    clearTimeout(pressTimer!);
-  });
+      showItemActionsModal({
+        isFolder,
+        itemId,
+        itemName,
+        itemDiv: itemDiv as HTMLElement
+      });
+
+    }, 500);
+  }
+
+  function handleTouchEnd() {
+    if (pressTimer) {
+      clearTimeout(pressTimer);
+      pressTimer = null;
+    }
+  }
+
+  function handleTouchMove() {
+    if (pressTimer) {
+      clearTimeout(pressTimer);
+      pressTimer = null;
+    }
+  }
+
+  fileList.addEventListener('touchstart', handleTouchStart, { passive: false });
+  fileList.addEventListener('touchend', handleTouchEnd);
+  fileList.addEventListener('touchmove', handleTouchMove);
 
   fileList.addEventListener('click', async (event) => {
     let target = event.target as HTMLElement;
