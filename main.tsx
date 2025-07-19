@@ -968,31 +968,6 @@ document.addEventListener('DOMContentLoaded', () => {
   fileList.addEventListener('touchend', handleTouchEnd);
   fileList.addEventListener('touchmove', handleTouchMove);
 
-  fileList.addEventListener('touchstart', (event) => {
-    const itemDiv = (event.target as HTMLElement).closest('.file-item');
-    if (!itemDiv || itemDiv.classList.contains('is-renaming')) return;
-
-    pressTimer = window.setTimeout(() => {
-      pressTimer = null;
-      document.querySelectorAll('.file-actions.visible').forEach(menu => menu.classList.remove('visible'));
-      const actionsDiv = itemDiv.querySelector('.file-actions');
-      if (actionsDiv && actionsDiv.innerHTML.trim() !== '') {
-        actionsDiv.classList.add('visible');
-        if (window.navigator.vibrate) {
-          window.navigator.vibrate(50);
-        }
-      }
-    }, 1000);
-  }, { passive: true });
-
-  fileList.addEventListener('touchend', () => {
-    clearTimeout(pressTimer!);
-  });
-
-  fileList.addEventListener('touchmove', () => {
-    clearTimeout(pressTimer!);
-  });
-
   fileList.addEventListener('click', async (event) => {
     let target = event.target as HTMLElement;
     const clickableItem = target.closest('.file-item');
