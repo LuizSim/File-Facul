@@ -1,7 +1,6 @@
 import { type AuthSession } from '@supabase/supabase-js';
 import { extractContentFromFile } from './file_API';
 
-// Interface para o histórico de chat da Groq/OpenAI
 interface GroqMessage {
     role: 'system' | 'user' | 'assistant';
     content: string;
@@ -13,7 +12,6 @@ export function initializeAliss(session: AuthSession | null): void {
         return;
     }
 
-    // --- Seleção dos Elementos do DOM ---
     const chatMessagesContainer = document.getElementById('aliss-chat-messages') as HTMLElement;
     const promptForm = document.getElementById('aliss-prompt-form') as HTMLFormElement;
     const questionInput = document.getElementById('aliss-question-input') as HTMLInputElement;
@@ -24,7 +22,6 @@ export function initializeAliss(session: AuthSession | null): void {
     let filesContent = '';
     let conversationHistory: GroqMessage[] = [];
 
-    // --- FUNÇÃO addMessage (MOVIDA PARA CIMA) ---
     const addMessage = (text: string, sender: 'user' | 'aliss'): HTMLElement => {
         const messageDiv = document.createElement('div');
         messageDiv.className = `message ${sender}`;
@@ -36,20 +33,17 @@ export function initializeAliss(session: AuthSession | null): void {
         return messageDiv;
     };
 
-    // --- INICIALIZAÇÃO DA IA ---
     const groqApiKey = import.meta.env.VITE_GROQ_API_KEY;
     if (!groqApiKey) {
         addMessage("Erro: A chave de API da Groq não foi configurada no arquivo .env.", "aliss");
         return;
     }
 
-    // Define a "personalidade" da IA como a primeira mensagem do histórico
     conversationHistory.push({
         role: 'system',
         content: "Você é uma assistente de IA prestativa e amigável chamada Aliss. Seu nome é Aliss. Responda sempre em português do Brasil. Baseie suas respostas no histórico da conversa e no contexto de arquivos, se fornecido."
     });
 
-    // --- Funções Principais ---
     const setFormDisabled = (disabled: boolean) => {
         isLoading = disabled;
         questionInput.disabled = disabled;
@@ -82,7 +76,7 @@ export function initializeAliss(session: AuthSession | null): void {
 
             const apiUrl = 'https://api.groq.com/openai/v1/chat/completions';
             const requestBody = {
-                model: "llama3-8b-8192", // Modelo rápido da Groq
+                model: "llama3-8b-8192",
                 messages: conversationHistory,
                 stream: true
             };
@@ -127,7 +121,6 @@ export function initializeAliss(session: AuthSession | null): void {
                                 chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
                             }
                         } catch (e) {
-                            // Ignora linhas que não são JSON válido
                         }
                     }
                 }
@@ -146,7 +139,6 @@ export function initializeAliss(session: AuthSession | null): void {
 
     const handleFileChange = async (event: Event) => {
         const input = event.target as HTMLInputElement;
-        // Pega a lista de arquivos logo no início
         const files = input.files ? Array.from(input.files) : [];
         if (files.length === 0) return;
 
@@ -154,14 +146,12 @@ export function initializeAliss(session: AuthSession | null): void {
         addMessage(`Processando ${files.length} arquivo(s)...`, 'aliss');
 
         const allContents: string[] = [];
-        // Itera sobre a lista de arquivos
         for (const file of files) {
             try {
                 const extracted = await extractContentFromFile(file);
                 if (extracted.type === 'text') {
                     allContents.push(`--- Conteúdo do arquivo: ${file.name} ---\n${extracted.content}\n--- Fim do arquivo: ${file.name} ---`);
                 } else {
-                    // Se a API não suportar imagens, um aviso é mostrado
                     addMessage(`Aviso: O arquivo de imagem '${file.name}' foi ignorado (não suportado pela API de texto).`, 'aliss');
                 }
             } catch (err) {
@@ -170,23 +160,11 @@ export function initializeAliss(session: AuthSession | null): void {
             }
         }
         filesContent = allContents.join('\n\n');
-
-        // --- INÍCIO DA ALTERAÇÃO ---
-
-        // Cria uma lista de nomes de arquivos para exibir na UI
         const fileNames = files.map(file => `• ${file.name}`).join('\n');
-
-        // Cria a mensagem final de confirmação
         const confirmationMessage = `Arquivos carregados:\n${fileNames}\n\nAgora você pode fazer uma pergunta sobre eles.`;
-
         addMessage(confirmationMessage, 'aliss');
-
-        // --- FIM DA ALTERAÇÃO ---
-
         setFormDisabled(false);
     };
-
-    // --- Event Listeners ---
     promptForm.addEventListener('submit', handleSendMessage);
     attachBtn.addEventListener('click', () => fileInput.click());
     fileInput.addEventListener('change', handleFileChange);

@@ -1,11 +1,11 @@
 import { supabase } from './supabaseClient';
 import type { AuthSession } from '@supabase/supabase-js';
 
-// Função handleCreateFolder (sem alterações)
+
 export async function handleCreateFolder(
     folderName: string,
     currentSession: AuthSession | null,
-    parentFolderId: string | null = null // Este é o terceiro parâmetro que estava faltando
+    parentFolderId: string | null = null
 ): Promise<{ success: boolean; error?: string }> {
 
     if (!folderName.trim()) {
@@ -21,7 +21,7 @@ export async function handleCreateFolder(
             .insert({
                 name: folderName.trim(),
                 owner_id: currentSession.user.id,
-                parent_folder_id: parentFolderId // Usando o terceiro parâmetro aqui
+                parent_folder_id: parentFolderId
             })
             .select()
             .single();
@@ -43,7 +43,7 @@ export async function handleCreateFolder(
     }
 }
 
-// Função deleteFolderAndContents (sem alterações)
+
 export async function deleteFolderAndContents(folderId: string): Promise<{ success: boolean; error?: string }> {
     try {
         const { data: filesInFolder, error: filesError } = await supabase
@@ -84,7 +84,7 @@ export async function deleteFolderAndContents(folderId: string): Promise<{ succe
 }
 
 
-// --- NOVA FUNÇÃO PARA RENOMEAR PASTAS ---
+
 export async function renameFolder(folderId: string, newName: string): Promise<{ success: boolean, error?: string }> {
     if (!newName.trim()) {
         return { success: false, error: "O nome da pasta não pode estar vazio." };

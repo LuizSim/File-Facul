@@ -2,7 +2,7 @@ import * as pdfjsLib from 'pdfjs-dist';
 import Tesseract from 'tesseract.js';
 import * as XLSX from 'xlsx';
 
-// Alterado: Aponta para o arquivo local na pasta 'public'
+
 pdfjsLib.GlobalWorkerOptions.workerSrc = `/pdf.worker.min.mjs`;
 
 export type ExtractedContent = {
@@ -24,14 +24,14 @@ export async function extractContentFromFile(file: File): Promise<ExtractedConte
         }
     }
 
-    // Lógica para Excel, PDF e outros são baseados em ArrayBuffer
+
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = async (event) => {
             try {
                 const result = event.target?.result;
                 if (!(result instanceof ArrayBuffer)) {
-                    // Para arquivos de texto simples, que são lidos como string
+
                     if (typeof result === 'string') {
                         resolve({ type: 'text', content: result });
                         return;
@@ -61,13 +61,13 @@ export async function extractContentFromFile(file: File): Promise<ExtractedConte
         };
         reader.onerror = (error) => reject(error);
 
-        // Define como cada arquivo deve ser lido
+
         if (file.type === 'application/pdf' || file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
             reader.readAsArrayBuffer(file);
         } else if (file.type.startsWith('text/') || isCodeFile(file.name)) {
             reader.readAsText(file, 'UTF-8');
         } else {
-            // Se for um tipo desconhecido, tentamos ler como ArrayBuffer para o caso de ser um Excel sem a extensão correta
+
             reader.readAsArrayBuffer(file);
         }
     });

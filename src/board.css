@@ -36,11 +36,11 @@ header > h1 {
 .columns {
     display: flex;
     gap: 15px;
-    margin: 50px auto;           /* centraliza horizontalmente */
+    margin: 50px auto;         
     flex-wrap: wrap;
     width: 100%;
-    justify-content: center;     /* centraliza os itens filhos */
-    align-items: center;         /* alinha verticalmente se tiver altura */
+    justify-content: center;   
+    align-items: center;        
 }
 
 .column {
@@ -103,7 +103,6 @@ header > h1 {
     align-items: center;
 }
 
-/* Alterado: Filtro removido daqui e adicionado position/overflow */
 .card {
     position: relative;
     overflow: hidden;
@@ -117,7 +116,6 @@ header > h1 {
     transition: opacity 0.3s ease;
 }
 
-/* Adicionado: Pseudo-elemento para aplicar o filtro no fundo do card */
 .card::before,
 .card.ghost::before {
     content: '';
@@ -129,7 +127,7 @@ header > h1 {
     background-color: inherit;
     border-radius: inherit;
     filter: url(#liquidglass);
-    z-index: 0; /* Fica no fundo, mas acima do background */
+    z-index: 0;
 }
 
 .card.creating {
@@ -147,7 +145,6 @@ header > h1 {
     }
 }
 
-/* Alterado: Adicionado position e z-index para garantir que fique acima do filtro */
 .card__text {
     position: relative;
     z-index: 1;
@@ -239,7 +236,6 @@ header > h1 {
     opacity: 0;
 }
 
-/* Alterado: Adicionado position e overflow para o filtro funcionar */
 .card.ghost {
     position: fixed;
     overflow: hidden;
@@ -260,12 +256,11 @@ header > h1 {
     border-color: #0c2950;
 }
 
-/* Seletor mais específico para garantir prioridade */
 #board-view #back-to-files-btn {
   position: absolute;
   top: 30px;
-  right: 15vw; /* Garante a posição na direita */
-  left: auto;  /* Remove qualquer conflito com a propriedade 'left' */
+  right: 15vw;
+  left: auto;
   
   background-color: #0c2950;
   color: #fffeec;
@@ -291,7 +286,7 @@ header > h1 {
 }
 
 #back-to-files-btn:active {
- transform: scale(0.95); /* Pequena redução ao clicar */
+ transform: scale(0.95);
  transition: transform 0.1s ease-in-out;
 }
 

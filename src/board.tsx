@@ -24,14 +24,12 @@ export function initializeBoard(session: AuthSession | null): void {
     const columns = boardView.querySelectorAll<HTMLElement>(".column__cards");
     const body = document.body;
 
-    // --- VARIÁVEIS DE ESTADO ---
     let draggedCard: HTMLElement | null = null;
     let ghostCard: HTMLElement | null = null;
     let isDragging = false;
     let activeCard: HTMLElement | null = null;
     let startX = 0, startY = 0;
 
-    // --- LÓGICA DE DADOS E RENDERIZAÇÃO ---
     const fetchAndRenderCards = async () => {
         const { data, error } = await supabase.from('kanban_cards').select('*').eq('owner_id', userId).order('position', { ascending: true });
         if (error) { console.error("Erro ao buscar cards:", error); return; }
@@ -45,7 +43,6 @@ export function initializeBoard(session: AuthSession | null): void {
         });
     };
 
-    // --- CRIAÇÃO E MANIPULAÇÃO DE CARDS ---
     function createCardElement(cardData: KanbanCard): HTMLElement {
         const card = document.createElement("section");
         card.className = "card";
@@ -99,24 +96,24 @@ export function initializeBoard(session: AuthSession | null): void {
     const deleteCard = async (card: HTMLElement) => {
         const cardId = card.dataset.cardId;
 
-        // Se o card ainda não foi salvo no banco, apenas o remove da tela.
+
         if (!cardId || cardId === 'new') {
             card.remove();
             return;
         }
 
-        // Deleta o card do banco de dados diretamente.
+
         const { error } = await supabase.from('kanban_cards').delete().eq('id', cardId);
 
         if (error) {
             console.error("Erro ao deletar card:", error);
             alert("Não foi possível deletar o card.");
         } else {
-            card.remove(); // Remove o card da tela após deletar do DB com sucesso.
+            card.remove();
         }
     };
 
-    // --- LÓGICA DE ARRASTAR E SOLTAR (RESTAURADA) ---
+
 
     const onPointerDown = (e: MouseEvent | TouchEvent) => {
         const target = e.target as HTMLElement;
@@ -187,7 +184,7 @@ export function initializeBoard(session: AuthSession | null): void {
             const dropColumn = elementBelow ? elementBelow.closest('.column__cards') : null;
             if (dropColumn) {
                 dropColumn.appendChild(draggedCard);
-                // Atualiza o banco de dados
+
                 await supabase.from('kanban_cards').update({ column_id: dropColumn.id }).eq('id', draggedCard.dataset.cardId!);
             }
             draggedCard!.style.opacity = '1';
@@ -198,7 +195,7 @@ export function initializeBoard(session: AuthSession | null): void {
         isDragging = false;
     };
 
-    // --- EVENT LISTENERS ---
+
 
     const addEventListenersToCard = (card: HTMLElement) => {
         const cardText = card.querySelector('.card__text') as HTMLElement;
@@ -232,7 +229,7 @@ export function initializeBoard(session: AuthSession | null): void {
             toggleCardActions(card, !card.classList.contains('actions-active'));
         });
 
-        // Adiciona os listeners que iniciam o arraste
+
         card.addEventListener('mousedown', onPointerDown);
         card.addEventListener('touchstart', onPointerDown, { passive: true });
     };

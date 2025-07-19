@@ -1,11 +1,10 @@
 :root {
-  /* Nova pilha de fontes profissionais */
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
   color-scheme: light dark;
-  color: #0c2950; /* Cor principal do texto */
-  background-color: #fffeec; /* Cor principal do fundo */
+  color: #0c2950;
+  background-color: #fffeec;
   user-select: none;
 }
 
@@ -22,7 +21,7 @@ h2 {
   border-radius: 8px;
   width: 100%;
   box-sizing: border-box;
-  text-align: center; /* Alterado: de 'align-content' para 'text-align' */
+  text-align: center;
 }
 
 body { margin: 0; display: flex; place-items: center; min-width: 320px; min-height: 100vh; }
@@ -30,7 +29,7 @@ body { margin: 0; display: flex; place-items: center; min-width: 320px; min-heig
 
 form { display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem; }
 input, button {
-  font-family: inherit; /* Adicionado: Garante que usem a mesma fonte do resto do app */
+  font-family: inherit;
   padding: 0.75rem;
   border-radius: 8px;
   border: 1px solid transparent;
@@ -57,20 +56,18 @@ button:hover {
   
 }
 
-/* Container geral dos botões do cabeçalho */
 .header-buttons {
   display: flex;
   align-items: center;
-  gap: 10px; /* Esta linha adiciona um espaço de 10px entre os botões */
+  gap: 10px;
 }
 
 .header-right-group {
   display: flex;
   align-items: center;
-  gap: 20px; /* Espaço entre o nome do usuário e os botões */
+  gap: 20px;
 }
 
-/* Estilo para o novo botão Aliss (e outros botões de ação se necessário) */
 .header-action-btn {
   background-color: #0c2950;
   color: #fffeec;
@@ -86,24 +83,22 @@ button:hover {
 }
 
 #menu-toggle-btn {
-  padding: 8px; /* Padding para o botão do ícone */
+  padding: 8px;
 }
 
 .header-action-btn:hover {
   transform: scale(1.05);
-  background-color: #0c2950; /* Mantém a cor no hover */
+  background-color: #0c2950;
   color: #fffeec;
 }
 
-/* Container que posiciona o dropdown */
 .menu-container {
   position: relative;
 }
 
-/* O menu dropdown */
 .dropdown-menu {
   position: absolute;
-  top: calc(100% + 5px); /* Posiciona abaixo do botão de menu */
+  top: calc(100% + 5px);
   right: 0;
   background-color: #fffeec;
   border: 1px solid #0c2950;
@@ -116,14 +111,12 @@ button:hover {
   transform-origin: top right;
 }
 
-/* Classe para esconder/mostrar o menu */
 .dropdown-menu.hidden {
   opacity: 0;
   transform: scale(0.95);
   pointer-events: none;
 }
 
-/* Botões dentro do dropdown */
 .dropdown-menu button {
   width: 100%;
   text-align: left;
@@ -140,7 +133,7 @@ button:hover {
 
 .dropdown-menu button:hover {
   background-color: rgba(12, 41, 80, 0.05);
-  color: #0c2950; /* Mantém a cor do texto no hover */
+  color: #0c2950;
 }
 
 #user-info {
@@ -149,14 +142,13 @@ button:hover {
   font-weight: bold;
 }
 
-/* Estilos para a tela de carregamento inicial */
 #initial-loading-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(255, 254, 236, 0.5); /* Fundo claro com transparência */
+  background: rgba(255, 254, 236, 0.5);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   z-index: 5000;
@@ -182,13 +174,12 @@ button:hover {
   margin-bottom: 2rem;
 }
 
-/* Spinner com a nova paleta de cores */
 .spinner {
   width: 50px;
   height: 50px;
   border-radius: 50%;
-  border: 4px solid rgba(12, 41, 80, 0.2); /* Borda escura e sutil */
-  border-top-color: #0c2950; /* Ponta que gira na cor escura */
+  border: 4px solid rgba(12, 41, 80, 0.2);
+  border-top-color: #0c2950;
   animation: spin 1.2s linear infinite;
 }
 
@@ -197,8 +188,6 @@ button:hover {
     transform: rotate(360deg);
   }
 }
-
-/* --- ESTILOS PARA A GRADE DE ÍCONES --- */
 
 #file-list {
   display: flex;
@@ -296,8 +285,6 @@ button:hover {
   height: 16px;
 }
 
-/* --- ESTILOS DE BOTÕES DE AÇÃO --- */
-
 .toggle-auth-view { background: none; border: none; padding: 0; margin-top: 1rem; color: #0c2950; text-decoration: underline; }
 
 .file-item.is-renaming { background-color: rgba(12, 41, 80, 0.1); outline: 1px solid #0c2950; }
@@ -307,8 +294,8 @@ button:hover {
   justify-content: center; 
   align-items: center; 
   gap: 8px; 
-  background-color: #0c2950; /* Fundo escuro */
-  color: #fffeec; /* Texto claro */
+  background-color: #0c2950;
+  color: #fffeec;
   font-weight: bold; 
   border: 1px solid #0c2950; 
   margin-top: 10px; 
@@ -387,7 +374,6 @@ button:hover {
   padding: 2rem;
 }
 
-/* Modals */
 #confirm-modal-overlay,
 #rename-folder-modal-overlay,
 #item-actions-modal-overlay {
@@ -586,31 +572,26 @@ button:hover {
   margin-right: 4px;
 }
 
-/* Cor do texto de placeholder (ex: "seu nome de usuário") */
 input[type="text"]::placeholder,
 input[type="password"]::placeholder {
-  color: rgba(12, 41, 80, 0.6); /* Cor escura com um pouco de transparência */
+  color: rgba(12, 41, 80, 0.6);
 }
 
-/* Estilos específicos para os campos de texto e senha */
 input[type="text"],
 input[type="password"] {
-  background-color: #fffeec; /* Fundo na mesma cor da página */
-  border: 1px solid #0c2950;   /* Borda escura para visibilidade */
-  color: #0c2950;            /* Texto digitado na cor escura */
-  transition: all 0.2s ease-in-out; /* Adicionado para suavizar todas as transições */
+  background-color: #fffeec;
+  border: 1px solid #0c2950;
+  color: #0c2950;
+  transition: all 0.2s ease-in-out;
 }
 
-/* Estilo ao focar no campo, para melhor usabilidade */
 input[type="text"]:focus,
 input[type="password"]:focus {
-  outline: none; /* Remove o outline padrão do navegador */
+  outline: none;
   border-color: #0c2950;
-  box-shadow: 0 0 0 2px rgba(12, 41, 80, 0.4); /* Adiciona um "brilho" azul ao redor */
-  transform: scale(1.02); /* Adicionado: Efeito de inflar */
+  box-shadow: 0 0 0 2px rgba(12, 41, 80, 0.4);
+  transform: scale(1.02);
 }
-
-/* --- Estilos para a tela de Loading de Upload --- */
 
 #loading-overlay {
   position: fixed;
@@ -618,7 +599,7 @@ input[type="password"]:focus {
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(255, 254, 236, 0.55); /* Fundo claro da paleta invertida */
+  background: rgba(255, 254, 236, 0.55);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
   z-index: 10000;
@@ -627,35 +608,31 @@ input[type="password"]:focus {
   justify-content: center;
   align-items: center;
   gap: 1.5rem;
-  
-  /* Escondido por padrão */
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.3s ease-in-out;
 }
 
-/* Classe que o JavaScript adiciona para tornar o overlay visível */
 #loading-overlay.visible {
   opacity: 1;
   pointer-events: all;
 }
 
-/* Estilo do texto dentro do loading overlay */
 #loading-overlay p {
   font-size: 1.2em;
   font-weight: 500;
-  color: #0c2950; /* Texto escuro da paleta invertida */
+  color: #0c2950;
 }
 
 .uploader-name {
   font-size: 0.75em;
-  color: rgba(12, 41, 80, 0.7); /* Cor escura, mas com transparência para diferenciar */
+  color: rgba(12, 41, 80, 0.7);
   margin-top: 4px;
   font-style: italic;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  width: 100%; /* Garante que o text-overflow funcione */
+  width: 100%;
 }
 
 #auth-view, #logged-in-view {
@@ -672,12 +649,10 @@ input[type="password"]:focus {
   z-index: 100; 
   background-color: #fffeec;
   overflow-y: auto; 
-  /* LINHA ADICIONADA: Define a animação */
   transition: transform 1s ease-in-out;
   transform: translateX(0);
 }
 
-/* Estilo para o botão de voltar no quadro de tarefas */
 #back-to-files-btn {
   position: absolute;
   top: 30px;
@@ -692,14 +667,14 @@ input[type="password"]:focus {
 
 #back-to-files-btn:hover {
   transform: scale(1.05);
-  background-color: #0c2950; /* Mantém a cor no hover */
+  background-color: #0c2950;
   color: #fffeec;
 }
 
 .not-owner-message {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   font-weight: bold;
-  color: rgb(12, 42, 80); /* Cor escura, mas com transparência */
+  color: rgb(12, 42, 80);
   font-size: 5vw;
   padding: 10px;
   border-radius: 8px;
@@ -707,30 +682,24 @@ input[type="password"]:focus {
   box-sizing: border-box;
 }
 
-/* --- ESTILOS DE TRANSIÇÃO E VISIBILIDADE DE TELAS (VERSÃO CORRIGIDA) --- */
-
-/* Base para todas as "telas" principais */
 #app, #board-view, #aliss-view {
   width: 100%;
   transition: opacity 0.4s ease-in-out, transform 0.4s ease-in-out;
-  box-sizing: border-box; /* Garante que padding não aumente o tamanho */
+  box-sizing: border-box;
 }
 
-/* Esconde o app de arquivos */
 .app-hidden {
   opacity: 0;
   transform: translateY(20px);
   pointer-events: none;
-  position: absolute; /* Tira do fluxo para não causar pulos */
+  position: absolute;
 }
 
-/* Esconde o quadro deslizando */
 #board-view.board-hidden {
   transform: translateY(100%);
   pointer-events: none;
 }
 
-/* Esconde a tela de login/cadastro e a tela Aliss */
 .view-hidden {
   opacity: 0;
   transform: translateY(30px);
@@ -741,15 +710,13 @@ input[type="password"]:focus {
   right: 0;
 }
 
-/* Container principal do armazenamento */
 .storage-container {
   display: flex;
-  justify-content: flex-end; /* Alinha o botão 'Mostrar' à direita */
+  justify-content: flex-end;
   margin: 1rem 0;
-  height: 40px; /* Altura fixa para evitar pulos no layout */
+  height: 40px;
 }
 
-/* Estilo da caixa de armazenamento, similar aos botões de download */
 .storage-info-box {
   display: flex;
   align-items: center;
@@ -768,28 +735,25 @@ input[type="password"]:focus {
   font-weight: 700;
 }
 
-/* Botão para mostrar o armazenamento (quando está escondido) */
 #show-storage-btn {
   padding: 8px 15px;
   font-size: 0.9em;
   font-weight: 500;
 }
 
-/* Botão de toggle (olho) DENTRO da caixa */
 #toggle-storage-btn {
   background: none;
   border: none;
   cursor: pointer;
   padding: 5px;
   margin-left: 15px;
-  /* Centraliza o ícone SVG perfeitamente */
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 #toggle-storage-btn svg {
-  stroke: #fffeec; /* Cor do ícone */
+  stroke: #fffeec;
   opacity: 0.7;
   transition: opacity 0.2s;
 }
@@ -798,7 +762,6 @@ input[type="password"]:focus {
   opacity: 1;
 }
 
-/* Classe para esconder os elementos */
 .hidden {
   display: none !important;
 }

@@ -5,7 +5,6 @@ import { handleCreateFolder, deleteFolderAndContents, renameFolder } from './fol
 import { initializeBoard } from './board';
 import { initializeAliss } from './Aliss';
 
-// Interfaces para tipagem
 interface Folder {
   id: string;
   created_at: string;
@@ -56,23 +55,19 @@ function getIconForItem(item: Folder | FileItemDB): string {
 }
 
 function sanitizeFileName(name: string): string {
-  // Separa o nome da extensão
   const extension = name.split('.').pop() || '';
   const nameWithoutExtension = name.substring(0, name.lastIndexOf('.')) || name;
 
   const sanitized = nameWithoutExtension
-    .normalize("NFD") // Separa acentos das letras (ex: 'á' -> 'a' + ´)
-    .replace(/[\u0300-\u036f]/g, "") // Remove os acentos
-    .replace(/[^a-zA-Z0-9_.-]/g, '_') // Substitui qualquer caractere não seguro por _
-    .replace(/\s+/g, '_'); // Substitui espaços por _
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-zA-Z0-9_.-]/g, '_')
+    .replace(/\s+/g, '_');
 
-  // Retorna o nome limpo + a extensão original
   return `${sanitized}.${extension}`;
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-
-  // Adicionado: Referência para a nova tela de carregamento
   const initialLoadingOverlay = document.querySelector<HTMLDivElement>('#initial-loading-overlay')!;
   const appElement = document.querySelector<HTMLDivElement>('#app')!;
   const authView = document.querySelector<HTMLDivElement>('#auth-view')!;
@@ -114,15 +109,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const storageInfo = document.querySelector<HTMLParagraphElement>('#storage-info')!;
   const uploadButton = document.querySelector<HTMLButtonElement>('#upload-button')!;
 
-  // Adicionado: Esconde a tela de carregamento após 2 segundos, incondicionalmente.
   setTimeout(() => {
-    // CORREÇÃO: Usa a variável que já existe, não declara uma nova.
     if (initialLoadingOverlay) {
       initialLoadingOverlay.classList.add('hidden');
     }
   }, 2000);
 
-  // Adicionado: Bloco de verificação detalhado para encontrar o elemento que falta
   const elementsToVerify = [
     { name: 'initialLoadingOverlay', element: initialLoadingOverlay },
     { name: 'appElement', element: appElement },
@@ -156,18 +148,16 @@ document.addEventListener('DOMContentLoaded', () => {
     { name: 'iconFileSelected', element: iconFileSelected },
   ];
 
-  // --- FUNÇÃO DE ARMAZENAMENTO ATUALIZADA ---
   async function updateStorageUsage() {
     if (!storageInfo) return;
 
     try {
-      // Chama a função 'get_total_storage_size' que criamos no banco de dados
       const { data, error } = await supabase.rpc('get_total_storage_size');
 
       if (error) throw error;
 
       const totalSize = data || 0;
-      const totalStorage = 1 * 1024 * 1024 * 1024; // 1 GB em Bytes
+      const totalStorage = 1 * 1024 * 1024 * 1024;
       const percentageUsed = (totalSize / totalStorage) * 100;
 
       storageInfo.innerHTML = `
@@ -192,7 +182,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   if (!allElementsFound) {
-    return; // Para a execução do script se algum elemento não for encontrado
+    return;
   }
 
   let isBoardInitialized = false;
@@ -219,24 +209,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const alissContainer = alissView.querySelector('.aliss-container') as HTMLElement;
 
     if (!alissView || !alissSplashScreen || !alissContainer || !splashText) return;
-
-    // 1. Prepara a cena: Garante que o chat está escondido e o splash visível.
     alissContainer.classList.add('hidden');
     alissSplashScreen.classList.remove('hidden');
-    // Remove a classe de animação para garantir que ela reinicie
     splashText.classList.remove('start-animation');
-
-    // 2. Mostra a página Aliss (que contém o splash)
     alissView.classList.remove('view-hidden');
     appElement.classList.add('app-hidden');
     boardView.classList.add('board-hidden');
 
-    // 3. Força o navegador a processar as mudanças e SÓ ENTÃO inicia a animação
     setTimeout(() => {
       splashText.classList.add('start-animation');
-    }, 20); // Um pequeno delay é suficiente
+    }, 20);
 
-    // 4. Agenda a troca para o chat após a animação do splash terminar
     setTimeout(() => {
       alissSplashScreen.classList.add('hidden');
       alissContainer.classList.remove('hidden');
@@ -245,7 +228,7 @@ document.addEventListener('DOMContentLoaded', () => {
         initializeAliss(session);
         isAlissInitialized = true;
       }
-    }, 3000); // Duração total da animação
+    }, 3000);
   };
 
   if (showBoardBtn) showBoardBtn.addEventListener('click', showBoard);
@@ -271,7 +254,6 @@ document.addEventListener('DOMContentLoaded', () => {
   let currentFolderId: string | null = null;
   let pressTimer: number | null = null;
 
-  // Nova função para mostrar o loader por um tempo fixo
   function showTimedLoader(text: string, duration: number = 3000) {
     if (loadingOverlayText) loadingOverlayText.textContent = text;
     loadingOverlay.classList.add('visible');
@@ -294,7 +276,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function showLoading(text: string = "Processando, aguarde...") {
     if (loadingOverlayText) loadingOverlayText.textContent = text;
-    loadingOverlay.classList.add('visible'); // MUDANÇA: Usa classe em vez de style
+    loadingOverlay.classList.add('visible');
     appElement.classList.add('app-blurred');
   }
 
@@ -312,7 +294,6 @@ document.addEventListener('DOMContentLoaded', () => {
       const yesBtn = document.getElementById('confirm-modal-yes-button');
       const noBtn = document.getElementById('confirm-modal-no-button');
 
-      // Verificação de existência dos elementos
       if (!overlay || !messageElem || !yesBtn || !noBtn) {
         console.error('Erro: Elementos do modal de confirmação não encontrados.');
         resolve(false);
@@ -344,17 +325,14 @@ document.addEventListener('DOMContentLoaded', () => {
     fileInput.value = '';
   }
 
-  // Modificado: A função `updateView` agora também esconde o loading inicial.
   function updateView() {
     if (session) {
-      // Mostra a tela de arquivos e esconde a de login
       authView.classList.add('view-hidden');
       loggedInView.classList.remove('view-hidden');
 
       userInfo.textContent = ` ${session.user.user_metadata.username || session.user.email}`;
       displayItemsInCurrentFolder(currentFolderId);
     } else {
-      // Mostra a tela de login e esconde a de arquivos
       authView.classList.remove('view-hidden');
       loggedInView.classList.add('view-hidden');
 
@@ -391,7 +369,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     try {
-      // CORREÇÃO: Lógica de query sem 'eqOrIsNull'
       let foldersQuery = supabase.from('folders').select('*');
       if (folderIdToDisplay === null) {
         foldersQuery = foldersQuery.is('parent_folder_id', null);
@@ -410,7 +387,6 @@ document.addEventListener('DOMContentLoaded', () => {
       const { data: filesData, error: filesError } = await filesQuery.order('created_at', { ascending: false });
       if (filesError) throw filesError;
 
-      // CORREÇÃO: Tipagem explícita para os parâmetros
       const fetchedFolders: Folder[] = foldersData?.map((f: any) => ({ ...f, item_type: 'folder' as const })) || [];
       const fetchedFiles: FileItemDB[] = filesData?.map((f: any) => ({ ...f, item_type: 'file' as const })) || [];
 
@@ -450,7 +426,7 @@ document.addEventListener('DOMContentLoaded', () => {
           itemDiv.classList.add('folder-item');
           itemDiv.dataset.folderId = String(item.id);
           itemDiv.dataset.folderName = item.name;
-          itemDiv.dataset.ownerId = item.owner_id; // <-- Adicionado aqui
+          itemDiv.dataset.ownerId = item.owner_id;
 
           itemDiv.innerHTML = `
             <div class="item-icon">${iconHtml}</div>
@@ -464,17 +440,14 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
             <div class="file-actions"></div>
           `;
-          // ... dentro da função displayItemsInCurrentFolder, dentro do forEach
 
-        } else { // Se for um arquivo
+        } else {
           itemDiv.dataset.uploaderId = item.uploader_id;
           itemDiv.dataset.storagePath = item.storage_path;
           itemDiv.dataset.fileId = item.id;
 
-          // Adicionado: Pega o nome do uploader do mapa que já buscamos
           const uploaderName = profilesMap.get(item.uploader_id)?.full_name || 'Desconhecido';
 
-          // Modificado: Adiciona o span com o nome do uploader
           itemDiv.innerHTML = `
           <div class="item-icon">${iconHtml}</div>
           <span class="item-name" title="${itemName}">${itemName}</span>
@@ -482,7 +455,6 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="file-actions"></div>`;
 
           const actionsDiv = itemDiv.querySelector('.file-actions')!;
-          // Botão de Download: Sempre visível para arquivos
           if (item.item_type === 'file') {
             const { data: publicUrlData } = supabase.storage.from('files').getPublicUrl(item.storage_path);
             const downloadLink = document.createElement('a');
@@ -495,14 +467,12 @@ document.addEventListener('DOMContentLoaded', () => {
             actionsDiv.appendChild(downloadLink);
 
             const isOwner = currentLoggedInUserId === item.uploader_id;
-            if (isOwner) { // Botão de Deletar: Apenas para o dono
+            if (isOwner) {
               const deleteFileBtn = document.createElement('button');
               deleteFileBtn.className = 'excluir';
               deleteFileBtn.title = 'Deletar arquivo';
               deleteFileBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="display:inline-block;vertical-align:middle;"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.134-2.09-2.134H8.09a2.09 2.09 0 00-2.09 2.134v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg>`;
               actionsDiv.appendChild(deleteFileBtn);
-
-              // Estilo opcional para o botão
               deleteFileBtn.style.borderRadius = '4px';
               deleteFileBtn.style.padding = '4px 10px';
               deleteFileBtn.style.background = '#ef4444';
@@ -515,7 +485,6 @@ document.addEventListener('DOMContentLoaded', () => {
               deleteFileBtn.style.transition = 'background 0.2s';
               deleteFileBtn.onmouseover = () => { deleteFileBtn.style.background = '#dc2626'; };
               deleteFileBtn.onmouseout = () => { deleteFileBtn.style.background = '#ef4444'; };
-
               deleteFileBtn.addEventListener('click', async (e) => {
                 e.preventDefault();
                 const confirmed = await showCustomConfirm('Tem certeza que deseja deletar este ARQUIVO? Esta ação é irreversível.');
@@ -572,12 +541,10 @@ document.addEventListener('DOMContentLoaded', () => {
             deleteBtn.dataset.fileId = String(item.id);
             deleteBtn.dataset.storagePath = item.storage_path;
           }
-          // Aumenta o tamanho do ícone SVG para 28x28
           deleteBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="display:inline-block;vertical-align:middle;"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.134-2.09-2.134H8.09a2.09 2.09 0 00-2.09 2.134v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg>`;
           actionsDiv.appendChild(deleteBtn);
         }
 
-        // Torna o botão de deletar retangular
         const actionsDiv = itemDiv.querySelector('.file-actions')!;
         const deleteBtnEl = actionsDiv.querySelector('.delete-button') as HTMLButtonElement | null;
         if (deleteBtnEl) {
@@ -593,7 +560,6 @@ document.addEventListener('DOMContentLoaded', () => {
           deleteBtnEl.style.transition = 'background 0.2s';
           deleteBtnEl.onmouseover = () => { deleteBtnEl.style.background = '#dc2626'; };
           deleteBtnEl.onmouseout = () => { deleteBtnEl.style.background = '#ef4444'; };
-          // Ajusta o tamanho do SVG do botão de deletar
           const svg = deleteBtnEl.querySelector('svg');
           if (svg) {
             svg.setAttribute('width', '28');
@@ -622,7 +588,6 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    // Desabilita o botão e o input
     uploadButton.disabled = true;
     fileInput.disabled = true;
     uploadButton.innerHTML = `<span>Enviando ${files.length} arquivo(s)...</span>`;
@@ -631,7 +596,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let allUploadsSuccessful = true;
 
-    // Faz o upload de cada arquivo um por um
     for (const file of files) {
       const sanitizedOriginalName = sanitizeFileName(file.name);
       const storageFolderPrefix = currentFolderId ? `${session.user.id}/${currentFolderId}` : `${session.user.id}/root`;
@@ -654,14 +618,13 @@ document.addEventListener('DOMContentLoaded', () => {
         allUploadsSuccessful = false;
         console.error(`Falha no upload de ${file.name}:`, e);
         showAppMessage(`Falha no upload de ${file.name}: ${e.message}`, 'error');
-        break; // Para o loop se um arquivo falhar
+        break;
       }
     }
 
-    // Reabilita o botão e o input
     uploadButton.disabled = false;
     fileInput.disabled = false;
-    uploadButton.innerHTML = `<svg>...</svg><span>Enviar Arquivo</span>`; // Coloque seu SVG original de volta aqui
+    uploadButton.innerHTML = `<svg>...</svg><span>Enviar Arquivo</span>`;
 
     if (allUploadsSuccessful) {
       showAppMessage('Upload(s) concluído(s) com sucesso!', 'success');
@@ -670,7 +633,7 @@ document.addEventListener('DOMContentLoaded', () => {
     uploadForm!.reset();
     resetFileInputLabel();
     displayItemsInCurrentFolder(currentFolderId);
-    updateStorageUsage(); // Atualiza a contagem após o upload
+    updateStorageUsage();
   }
 
   async function handleAttemptDeleteFolder(folderId: string) {
@@ -761,7 +724,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // --- EVENT LISTENERS ---
   showSignupViewButton.addEventListener('click', (_event) => {
     if (loginContainer && signupContainer) { loginContainer.style.display = 'none'; signupContainer.style.display = 'block'; }
   });
@@ -821,14 +783,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const itemDiv = (event.target as HTMLElement).closest('.file-item') as HTMLElement | null;
     if (!itemDiv) return;
 
-    // Pegue dados do item
     const isFolder = itemDiv.classList.contains('folder-item');
     const itemId = isFolder ? itemDiv.dataset.folderId : itemDiv.dataset.fileId;
     const itemName = isFolder
       ? itemDiv.querySelector('.folder-name-display')?.textContent ?? undefined
       : itemDiv.querySelector('.item-name')?.textContent ?? undefined;
 
-    // Verifique se o usuário é o autor
     const ownerId = isFolder ? itemDiv.dataset.ownerId : itemDiv.dataset.uploaderId;
     console.log(ownerId);
 
@@ -840,14 +800,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Defina a função (esqueleto)
   function showItemActionsModal(args: {
     isFolder: boolean,
     itemId: string | undefined,
     itemName: string | undefined,
     itemDiv: HTMLElement
   }) {
-    // Seleciona o overlay e os elementos do modal de ações
     const overlay = document.getElementById('item-actions-modal-overlay') as HTMLDivElement;
     const modal = document.getElementById('item-actions-modal') as HTMLDivElement;
     const buttonsDiv = document.getElementById('item-actions-buttons') as HTMLDivElement;
@@ -856,14 +814,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (!overlay || !modal || !buttonsDiv || !title || !cancelBtn) return;
 
-    // Atualiza o título do modal
     title.textContent = args.itemName ? `Ações para "${args.itemName}"` : 'Ações';
 
     buttonsDiv.style.gap = '1rem';
     title.textContent = args.itemName ? `Ações para "${args.itemName}"` : 'Ações';
     buttonsDiv.innerHTML = '';
 
-    // Botão de baixar (apenas para arquivos)
     if (!args.isFolder) {
       const downloadBtn = document.createElement('button');
       downloadBtn.className = 'download-button';
@@ -876,8 +832,7 @@ document.addEventListener('DOMContentLoaded', () => {
       };
       buttonsDiv.appendChild(downloadBtn);
 
-      // Botão de deletar (apenas se o usuário for o dono)
-      const currentLoggedInUserId = session!.user.id; // Certifique-se de que 'session' está acessível aqui
+      const currentLoggedInUserId = session!.user.id;
       const uploaderId = args.itemDiv.dataset.uploaderId;
 
       if (uploaderId === currentLoggedInUserId) {
@@ -900,12 +855,11 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    // Botão de renomear (apenas para pastas e se for o dono)
     if (args.isFolder) {
-      const currentLoggedInUserId = session!.user.id; // Certifique-se de que 'session' está acessível aqui
+      const currentLoggedInUserId = session!.user.id;
       const ownerId = args.itemDiv.dataset.ownerId;
 
-      if (ownerId === currentLoggedInUserId) { // Condição para renomear pasta
+      if (ownerId === currentLoggedInUserId) {
         const renameBtn = document.createElement('button');
         renameBtn.className = 'rename-folder-button';
         renameBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="vertical-align:middle;"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125"></path></svg> Renomear`;
@@ -922,7 +876,6 @@ document.addEventListener('DOMContentLoaded', () => {
         };
         buttonsDiv.appendChild(renameBtn);
       } else {
-        // O usuário NÃO é o dono: mostra a mensagem
         const messageP = document.createElement('p');
         messageP.className = 'not-owner-message';
         messageP.textContent = 'Você não é o proprietário desta pasta';
@@ -930,12 +883,11 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    // Botão de deletar (apenas para pastas e se for o dono)
     if (args.isFolder) {
       const currentLoggedInUserId = session!.user.id;
       const ownerId = args.itemDiv.dataset.ownerId;
 
-      if (ownerId === currentLoggedInUserId) { // Condição para deletar pasta
+      if (ownerId === currentLoggedInUserId) {
         const deleteBtn = document.createElement('button');
         deleteBtn.className = 'delete-button';
         deleteBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="vertical-align:middle;"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.134-2.09-2.134H8.09a2.09 2.09 0 00-2.09 2.134v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg> Deletar`;
@@ -950,13 +902,11 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    // Botão de cancelar
     cancelBtn.onclick = () => {
       overlay.classList.remove('visible');
       document.getElementById('app')?.classList.remove('app-blurred');
     };
 
-    // Exibe o modal e aplica o blur no fundo
     overlay.classList.add('visible');
     document.getElementById('app')?.classList.add('app-blurred');
   }
@@ -975,7 +925,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     pressTimer = window.setTimeout(() => {
       pressTimer = null;
-      // A lógica principal do long press é mostrar o menu
       document.querySelectorAll('.file-actions.visible').forEach(menu => menu.classList.remove('visible'));
       const actionsDiv = itemDiv.querySelector('.file-actions');
       if (actionsDiv && actionsDiv.innerHTML.trim() !== '') {
@@ -1002,7 +951,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const renameBtn = target.closest('.rename-folder-button');
     if (renameBtn) {
-      // Pegue o nome atual e id da pasta
       const folderId = renameBtn.getAttribute('data-folder-id');
       const currentName = renameBtn.getAttribute('data-current-name');
       const overlay = document.getElementById('rename-folder-modal-overlay')!;
@@ -1011,7 +959,6 @@ document.addEventListener('DOMContentLoaded', () => {
       input.value = currentName || '';
       input.focus();
       input.setSelectionRange(0, input.value.length);
-      // Salve o id da pasta no overlay para uso posterior
       overlay.setAttribute('data-folder-id', folderId || '');
       return;
     }
@@ -1066,12 +1013,10 @@ document.addEventListener('DOMContentLoaded', () => {
     event.preventDefault();
     const folderName = folderNameInput.value;
 
-    // Mostra o loader por 3 segundos e continua o processo em paralelo
     showTimedLoader("Criando pasta...", 3000);
 
     const result = await handleCreateFolder(folderName, session, currentFolderId);
 
-    // O resultado da operação é tratado normalmente, sem o hideLoading()
     if (result.success) {
       showAppMessage('Pasta criada!', 'success');
       folderNameInput.value = '';
@@ -1093,11 +1038,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Modificado: Este bloco agora controla a CONDIÇÃO 2
   supabase.auth.onAuthStateChange((_event, newSession) => {
     session = newSession;
     if (!newSession) { currentFolderId = null; }
-    updateView(); // Apenas atualiza a view, não mexe mais no loader inicial
+    updateView();
   });
 
   const renameFolderModalOverlay = document.getElementById('rename-folder-modal-overlay')!;

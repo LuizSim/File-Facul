@@ -1,4 +1,3 @@
-/* Container principal da página Aliss */
 .aliss-container {
     display: flex;
     flex-direction: column;
@@ -8,35 +7,30 @@
     box-sizing: border-box;
     background-color: #fffeec;
     overflow: hidden;
-    /* Adiciona a transição para suavizar a aparição */
     transition: opacity 0.4s ease-in-out;
-    opacity: 1; /* Começa visível por padrão */
+    opacity: 1;
 }
 
-/* --- Novas Classes de Controle --- */
-
-/* Usada para esconder um elemento completamente, sem animação */
 .hidden {
     display: none !important;
 }
 
-/* Usada para a animação de desaparecer (fade-out) */
 .fading-out {
     opacity: 0 !important;
     pointer-events: none;
 }
 
-/* Cabeçalho da página Aliss */
+
 .aliss-header {
     display: flex;
     align-items: center;
     justify-content: center;
     width: 100%;
     position: relative;
-    padding: 2vw; /* Adiciona padding interno */
+    padding: 2vw;
     box-shadow: #051a358e 0px 2px 10px 0px;
     box-sizing: border-box;
-    border-radius: 0 0 5vw 5vw; /* Bordas arredondadas na parte inferior */
+    border-radius: 0 0 5vw 5vw; 
     flex-shrink: 0; 
     border-bottom: 1px solid rgba(12, 41, 80, 0.1);
 }
@@ -76,20 +70,18 @@
 
 #back-button-aliss:hover {
   transform: scale(1.05);
-  background-color: #0c2950; /* Mantém a cor no hover */
+  background-color: #0c2950;
   color: #fffeec;
 }
 
-/* Interface de Chat que se expande para preencher o espaço */
 .chat-interface {
     display: flex;
     flex-direction: column;
     width: 100%;
-    flex-grow: 1; /* Faz esta seção ocupar todo o espaço vertical restante */
+    flex-grow: 1; 
     overflow: hidden; 
 }
 
-/* Área das mensagens com rolagem interna */
 .chat-messages {
     flex-grow: 1;
     padding: 1rem; 
@@ -99,7 +91,6 @@
     gap: 12px;
 }
 
-/* Estilos das bolhas de mensagem */
 .message {
     padding: 10px 15px;
     border-radius: 18px;
@@ -108,7 +99,6 @@
     line-height: 1.4;
     font-size: 0.95em;
     word-break: break-word;
-    /* Linha adicionada para aplicar a animação */
     animation: slide-fade-in 0.4s ease-out;
 }
 
@@ -119,9 +109,9 @@
 }
 
 .message p {
-  user-select: text; /* Permite que o texto seja selecionado */
-  -webkit-user-select: text; /* Compatibilidade com navegadores mais antigos */
-  -moz-user-select: text; /* Compatibilidade com Firefox */
+  user-select: text;
+  -webkit-user-select: text;
+  -moz-user-select: text;
 }
 
 .message.user {
@@ -138,7 +128,6 @@
     border-bottom-left-radius: 4px;
 }
 
-/* Animação "Pensando..." */
 .message.aliss.thinking span {
     animation: bounce 1.4s infinite ease-in-out both;
     display: inline-block;
@@ -153,7 +142,6 @@
     40% { transform: scale(1.0); }
 }
 
-/* Mantendo sua estrutura original de input */
 .chat-input-area {
     display: flex;
     flex-direction: column;
@@ -162,10 +150,10 @@
     border-top: 1px solid rgba(12, 41, 80, 0.2);
     width: 100%;
     height: 40vw;
-    border-radius: 5vw 5vw 0 0; /* Bordas arredondadas na parte inferior */
+    border-radius: 5vw 5vw 0 0;
     box-sizing: border-box;
     position: relative;
-    flex-shrink: 0; /* Impede que a área de input encolha */
+    flex-shrink: 0; 
 }
 
 .chat-input-area input[type="text"] {
@@ -182,7 +170,7 @@
     color: #555;
     padding: 5px;
     cursor: pointer;
-    margin-bottom: 5px; /* Espaço abaixo dele */
+    margin-bottom: 5px; 
 }
 
 #aliss-attach-btn:hover {
@@ -194,7 +182,6 @@
     height: 22px;
 }
 
-/* Container para a caixa de texto e o botão de enviar */
 .input-send-container {
     display: flex;
     width: 100%;
@@ -210,7 +197,6 @@
     font-size: 1em;
     outline: none;
     box-sizing: border-box;
-    /* LINHA ADICIONADA: Define o fundo como branco */
     background-color: #ffffff;
 }
 
@@ -219,7 +205,6 @@
     box-shadow: 0 0 0 2px rgba(12, 41, 80, 0.2);
 }
 
-/* Botão de Enviar Mensagem */
 #aliss-send-btn {
     background: #0c2950;
     color: #fffeec;
@@ -230,7 +215,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    flex-shrink: 0; /* Impede que o botão encolha */
+    flex-shrink: 0;
     cursor: pointer;
     transition: filter 0.2s;
 }
@@ -244,7 +229,6 @@
     height: 20px;
 }
 
-/* Esconde o input de arquivo real */
 .visually-hidden {
     position: absolute;
     width: 1px;
@@ -254,8 +238,6 @@
     clip: rect(0, 0, 0, 0);
     border-width: 0;
 }
-
-/* --- Estilos da Tela de Introdução (Splash Screen) --- */
 
 #aliss-splash-screen {
     display: flex;
@@ -269,15 +251,13 @@
 .splash-text {
     font-size: 5rem;
     color: #0c2950;
-    opacity: 0; /* Começa invisível por padrão */
+    opacity: 0;
 }
 
-/* Nova classe que ATIVA a animação */
 .splash-text.start-animation {
     animation: fade-in-out 2.5s ease-in-out forwards;
 }
 
-/* Animação para o texto aparecer e desaparecer */
 @keyframes fade-in-out {
     0% {
         opacity: 0;
@@ -293,7 +273,6 @@
     }
 }
 
-/* Animação para as mensagens aparecerem suavemente */
 @keyframes slide-fade-in {
   from {
     opacity: 0;
@@ -305,7 +284,6 @@
   }
 }
 
-/* Classe genérica para esconder elementos */
 .hidden {
     display: none !important;
 }
