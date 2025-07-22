@@ -23,7 +23,6 @@ export function initializeBoard(session: AuthSession | null): void {
 
     const columns = boardView.querySelectorAll<HTMLElement>(".column__cards");
     const body = document.body;
-
     let draggedCard: HTMLElement | null = null;
     let ghostCard: HTMLElement | null = null;
     let isDragging = false;
@@ -48,12 +47,16 @@ export function initializeBoard(session: AuthSession | null): void {
         card.className = "card";
         card.dataset.cardId = cardData.id;
         card.innerHTML = `
-            <div class="card__text">${cardData.content}</div>
+            <div class="card__text"></div>
             <div class="card__actions">
                 <button class="edit__button" title="Editar">Editar</button>
                 <button class="delete__button" title="Deletar">Deletar</button>
             </div>
         `;
+        const cardText = card.querySelector('.card__text') as HTMLElement;
+
+        cardText.innerHTML = cardData.content.replace(/\n/g, '<br>');
+
         addEventListenersToCard(card);
         return card;
     }
@@ -95,16 +98,11 @@ export function initializeBoard(session: AuthSession | null): void {
 
     const deleteCard = async (card: HTMLElement) => {
         const cardId = card.dataset.cardId;
-
-
         if (!cardId || cardId === 'new') {
             card.remove();
             return;
         }
-
-
         const { error } = await supabase.from('kanban_cards').delete().eq('id', cardId);
-
         if (error) {
             console.error("Erro ao deletar card:", error);
             alert("Não foi possível deletar o card.");
@@ -112,8 +110,6 @@ export function initializeBoard(session: AuthSession | null): void {
             card.remove();
         }
     };
-
-
 
     const onPointerDown = (e: MouseEvent | TouchEvent) => {
         const target = e.target as HTMLElement;
@@ -184,7 +180,6 @@ export function initializeBoard(session: AuthSession | null): void {
             const dropColumn = elementBelow ? elementBelow.closest('.column__cards') : null;
             if (dropColumn) {
                 dropColumn.appendChild(draggedCard);
-
                 await supabase.from('kanban_cards').update({ column_id: dropColumn.id }).eq('id', draggedCard.dataset.cardId!);
             }
             draggedCard!.style.opacity = '1';
@@ -195,8 +190,6 @@ export function initializeBoard(session: AuthSession | null): void {
         isDragging = false;
     };
 
-
-
     const addEventListenersToCard = (card: HTMLElement) => {
         const cardText = card.querySelector('.card__text') as HTMLElement;
         const deleteButton = card.querySelector('.delete__button') as HTMLButtonElement;
@@ -204,14 +197,20 @@ export function initializeBoard(session: AuthSession | null): void {
 
         cardText.addEventListener("focusout", async () => {
             cardText.contentEditable = 'false';
-            const newContent = cardText.textContent?.trim() || '';
+
+
+            let contentToSave = cardText.innerHTML;
+            const newContent = contentToSave.trim();
+
             const cardId = card.dataset.cardId;
             const columnId = card.parentElement!.id;
+
             if (!newContent) {
                 if (cardId !== 'new') await supabase.from('kanban_cards').delete().eq('id', cardId!);
                 card.remove();
                 return;
             }
+
             if (cardId === 'new') {
                 const { data, error } = await supabase.from('kanban_cards').insert({ content: newContent, column_id: columnId, owner_id: userId }).select().single();
                 if (error) console.error("Erro ao inserir card:", error);
@@ -223,13 +222,10 @@ export function initializeBoard(session: AuthSession | null): void {
 
         deleteButton.addEventListener('click', () => deleteCard(card));
         editButton.addEventListener('click', () => enableEdit(card));
-
         card.addEventListener('click', (e) => {
             if (isDragging || (e.target as HTMLElement).closest('.card__actions')) return;
             toggleCardActions(card, !card.classList.contains('actions-active'));
         });
-
-
         card.addEventListener('mousedown', onPointerDown);
         card.addEventListener('touchstart', onPointerDown, { passive: true });
     };
